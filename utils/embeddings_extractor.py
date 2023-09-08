@@ -1,3 +1,5 @@
+# TODO deprecated
+
 def extract_embedding(query_word: str, data_path: str):
     etalon = query_word.lower()
     with open(data_path) as file:

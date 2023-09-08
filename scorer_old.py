@@ -46,7 +46,7 @@ with open('keys/gold/training/training.key.tsv') as gold_file:
         op = cols[2]
         instance_to_gold_ans[inst] = (sense, op)
 
-result_path = 'result/result5.csv'
+result_path = 'result/node2vec_result.csv'
 # result_path = 'keys/baseline/training/training.first-word-first-sense.key.tsv'
 with open(result_path) as sys_file:
     for line in sys_file:
@@ -91,10 +91,14 @@ for inst in instance_to_gold_ans:
 
     # Eval 1: is the system identify the right lemma (regardless of operation
     # and sense) on which this operation should be performed
+    flag = True
     for lemma in gold_lemmas:
         if lemma in system_lemmas:
             lemma_matches += 1
+            flag = False
             break
+    if not flag:
+        print(system_wn_synset, gold_wn_synset)
 
     # Eval 2: how similar is the attachment point for this synset
     correction = 0

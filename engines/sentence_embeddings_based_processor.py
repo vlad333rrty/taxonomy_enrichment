@@ -4,12 +4,13 @@ from concurrent.futures import ThreadPoolExecutor
 
 import nltk
 from nltk.corpus.reader import Synset
-from nltk.corpus import wordnet
+from nltk.corpus import wordnet31 as wordnet
 
 
 from common import performance
 from common.set_m import SetM
 from engines.essential_words_gathering_utils import gather_essential_words
+from engines.processor_base import ProcessingResult
 from engines.word_to_add_data import WordToAddData
 from utils.similarity import cos_sim
 from sentence_transformers import SentenceTransformer
@@ -19,6 +20,10 @@ class SentenceEmbeddingsBasedProcessor:
     def __init__(self, cache_name='synset_name_to_embedding', use_cache=True):
         self._cache_name = cache_name
         self.use_cache = use_cache
+        self.__closest_sysnets_embeddings_aggregator = None
+
+    def set_closest_sysnets_embeddings_aggregator(self, closest_sysnets_embeddings_aggregator):
+        self.__closest_sysnets_embeddings_aggregator = closest_sysnets_embeddings_aggregator
 
     def process(self, words_to_add_data: [WordToAddData], model_name: str):
         sentence_transformer = SentenceTransformer(model_name)
@@ -35,7 +40,7 @@ class SentenceEmbeddingsBasedProcessor:
 
         word2embedding = dict(zip(words, embeddings))
 
-        essential_words_per_word, word_to_num = gather_essential_words(words_to_add_data, 10)
+        essential_words_per_word, num2word = gather_essential_words(words_to_add_data, 10)
 
         word2synsets = self.__get_word2synsets(essential_words_per_word)
         delta, synset_name2embeddings = performance.measure(
@@ -48,11 +53,11 @@ class SentenceEmbeddingsBasedProcessor:
         for word_id in word2synsets:
             synsets = word2synsets[word_id]
             closest_synsets = self.__get_k_nearest_synsets(word2embedding[word_id], synsets, synset_name2embeddings, 5)
-            result.append([
-                word_id,
-                closest_synsets[0],
-                'attach'  # todo temp
-            ])
+
+            if self.__closest_sysnets_embeddings_aggregator is not None:
+                self.__closest_sysnets_embeddings_aggregator.aggregate_and_insert_into_table(num2word[word_id], closest_synsets)
+
+            result.append(ProcessingResult(num2word[word_id], word_id, closest_synsets,  'attach'))
 
             counter += 1
             print('{}% completed'.format(counter / len(essential_words_per_word)))
@@ -142,7 +147,7 @@ class SentenceEmbeddingsBasedProcessor:
         return list(filter(lambda x: x.pos() == pos, [item for synset in synsets for item in synset]))
 
     @staticmethod
-    def __get_extended_synset_list(synsets):
+    def _get_extended_synset_list(synsets):
         used_synsets = SetM()
         return list(
             filter(
@@ -171,7 +176,7 @@ class SentenceEmbeddingsBasedProcessor:
         if len(filtered) > 0:
             return filtered
         synsets_flat = [item for synset in synsets for item in synset]
-        synsets_extended = SentenceEmbeddingsBasedProcessor.__get_extended_synset_list(synsets_flat)
+        synsets_extended = SentenceEmbeddingsBasedProcessor._get_extended_synset_list(synsets_flat)
         filtered = list(filter(lambda x: x.pos() == pos, [item for synset in synsets_extended for item in synset]))
         return filtered
 

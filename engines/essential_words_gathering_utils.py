@@ -18,7 +18,7 @@ def __get_nltk_pos(raw_pos: str):
 
 def gather_essential_words(words_to_add: [WordToAddData], limit: int):
     essential_words_per_word = {}
-    word_to_num = {}
+    num2word = {}
     for data in words_to_add:
         pos = data.pos
         definition = data.definition
@@ -27,8 +27,8 @@ def gather_essential_words(words_to_add: [WordToAddData], limit: int):
         essential_words = __get_essential_words(__get_nltk_pos(pos), nltk.word_tokenize(definition), limit)
 
         essential_words_per_word[id] = (essential_words, pos)
-        word_to_num[word] = data.num
-    return essential_words_per_word, word_to_num
+        num2word[id] = word
+    return essential_words_per_word, num2word
 
 
 def __get_essential_words(pos, definition, limit: int):
