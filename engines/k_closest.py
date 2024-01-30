@@ -4,7 +4,6 @@ from multiprocessing.pool import ThreadPool
 from common.performance import measure
 import utils.similarity
 
-import utils.embeddings_extractor
 
 
 def __read_data(path: str, seek: int, limit: int):

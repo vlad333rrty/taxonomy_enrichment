@@ -35,7 +35,7 @@ instance_to_gold_ans = {}
 instance_to_sys_ans = {}
 
 
-with open('keys/gold/training/training.key.tsv') as gold_file:
+with open('../data/datasets/semeval/keys/gold/training/training.key.tsv') as gold_file:
     for line in gold_file:
         cols = line.strip().split('\t')
         inst = cols[0]

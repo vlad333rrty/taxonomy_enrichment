@@ -1,11 +1,7 @@
-from app.ClosestSynsetsEmbeddingsAggregator import Node2VecClosestSynsetsEmbeddingsAggregator, \
-    PoincareClosestSynsetsEmbeddingsAggregator
 from dao.dao_factory import DaoFactory
-from engines.closest_synsets_aware_processor import ClosestSynsetsAwareProcessor
-from engines.essential_words_aware_processor import PoincareEmbeddingsEssentialWordsAwareProcessor, \
-    EmbeddingsBasedEssentialWordsAwareProcessor
+from engines.essential_words_aware_processor import EmbeddingsBasedEssentialWordsAwareProcessor
 from engines.word_to_add_data import WordToAddDataParser
-from result_printer import write_result, SemEvalTask2016FormatResultPrinter, AllStatisticsResultPrinter
+from format.result_printer import AllStatisticsResultPrinter
 
 
 def run_poincare():

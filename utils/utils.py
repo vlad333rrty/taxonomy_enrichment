@@ -1,4 +1,5 @@
 from nltk.corpus import wordnet31 as wn
+from nltk.corpus.reader import Synset
 
 from common.set_m import SetM
 
@@ -37,3 +38,7 @@ def get_extended_synset_list(synsets):
             )
         )
     )
+
+
+def get_synset_simple_name(synset: Synset):
+    return synset.name().split('.')[0]

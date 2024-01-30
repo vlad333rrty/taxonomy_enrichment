@@ -54,7 +54,7 @@ class PoincareClosestSynsetsEmbeddingsAggregator(ClosestSynsetsEmbeddingsAggrega
         return self.__einstein_midpoint(points)
 
 
-class Node2VecClosestSynsetsEmbeddingsAggregator(ClosestSynsetsEmbeddingsAggregator):
+class AveragingClosestSynsetsEmbeddingsAggregator(ClosestSynsetsEmbeddingsAggregator):
     def _average(self, points):
         np_points = list(
             map(

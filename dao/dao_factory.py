@@ -27,3 +27,11 @@ class DaoFactory:
     def create_node_embeddings_dao_2():
         return WordEmbeddingsDao(DaoFactory.__DB, 'node_embeddings_2')
 
+    @staticmethod
+    def create_fasttext_subword_embeddings_dao():
+        return WordEmbeddingsDao(DaoFactory.__DB, 'fasttext_embeddings_subword')
+
+    @staticmethod
+    def create_fasttext_subword_embeddings_enriched_dao():
+        return WordEmbeddingsDao(DaoFactory.__DB, 'fasttext_embeddings_subword_enriched')
+

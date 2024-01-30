@@ -2,7 +2,7 @@ from dao.dao_factory import DaoFactory
 from engines.essential_words_aware_processor import EmbeddingsBasedEssentialWordsAwareProcessor
 from engines.sentence_embeddings_based_processor import RelatedSynsetsFullConjunctureSentenceEmbeddingsBasedProcessor
 from engines.word_to_add_data import WordToAddDataParser
-from result_printer import AllStatisticsResultPrinter
+from format.result_printer import AllStatisticsResultPrinter
 
 
 def compare():
