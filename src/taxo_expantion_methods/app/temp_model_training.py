@@ -29,8 +29,8 @@ def dfs(root: Synset):
 
 def run_temp_model_training(device, epochs):
     model = TEMP(768 * 2, 256).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.02)
-    loss_fn = TEMPLoss(0.5).to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=2e-5, betas=(0.9, 0.999))
+    loss_fn = TEMPLoss(0.2).to(device)
     wn_reader = WordNetCorpusReader(Configuration.WORDNET_20_PATH, None)
     # all_synsets = list(wn_reader.all_synsets(wn_reader.NOUN))
     all_synsets = dfs(wn_reader.synset('entity.n.01'))
@@ -43,7 +43,7 @@ def run_temp_model_training(device, epochs):
     ds_creator = TEMPDsCreator(all_synsets, 1)
     embedding_provider = TEMPEmbeddingProvider(tokenizer, bert_model, device)
     trainer = TEMPTrainer(embedding_provider, 'data/models/TEMP/checkpoints')
-    trainer.train(model, optimizer, loss_fn, lambda: ds_creator.prepare_ds(train_synsets, 4),
-                  ds_creator.prepare_ds(test_synsets, 4), epochs)
+    trainer.train(model, optimizer, loss_fn, lambda: ds_creator.prepare_ds(train_synsets, 32),
+                  ds_creator.prepare_ds(test_synsets, 32)[:5], epochs)
 
 run_temp_model_training('cpu', 1)

@@ -18,6 +18,12 @@ class TEMPDsCreator:
         self.__all_synsets = all_synsets
         self.__negative_samples_per_node = negative_samples_per_node
 
+    def __select_path(self, node: Synset): # todo holly shit
+        paths = node.hypernym_paths()
+        for path in paths:
+            if path[0].name() == 'entity.n.01':
+                return path
+
     def __get_negative_sample(self, parent, node):
         random_node = random.choice(self.__all_synsets)
         i = 0
@@ -28,10 +34,10 @@ class TEMPDsCreator:
                 break
             i += 1
         if i > 0: print('Chose node in', i, 'iterations')
-        return random_node.hypernym_paths()[0] + [node]
+        return self.__select_path(random_node) + [node]
 
     def __collect_sample_paths(self, node: Synset):
-        path = node.hypernym_paths()[0]
+        path = self.__select_path(node)
         res = [path]
         for i in range(self.__negative_samples_per_node):
             res.append(self.__get_negative_sample(path[-2], node))

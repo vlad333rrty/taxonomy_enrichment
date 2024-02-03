@@ -89,7 +89,7 @@ class TEMPTrainer:
 
     def train(self, model, optimizer, temp_loss, train_ds_provider, valid_loader, epochs):
         plot_monitor = PlotMonitor()
-        monitor = TrainProgressMonitor(1, valid_loader, epochs, plot_monitor, self.__embedding_provider)
+        monitor = TrainProgressMonitor(2, valid_loader, epochs, plot_monitor, self.__embedding_provider)
         for epoch in range(epochs):
             train_loader = train_ds_provider()
             self.__train_epoch(model, temp_loss, optimizer, train_loader, epoch, monitor)
