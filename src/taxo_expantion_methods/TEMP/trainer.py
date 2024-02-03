@@ -23,7 +23,7 @@ class TrainProgressMonitor:
         self.__plot_monitor = plot_monitor
         self.__embedding_provider = embedding_provider
 
-    def step(self, model, epoch, i, samples, loss, loss_fn, device):
+    def step(self, model, epoch, i, samples, loss, loss_fn):
         self.__plot_monitor.accept(Metric('Train loss', loss.item()))
         self.__running_loss += loss.item()
         self.__running_items += 1
@@ -43,8 +43,8 @@ class TrainProgressMonitor:
                 positive_paths_count = len(positive_paths)
                 embeddings = torch.stack(
                     list(map(self.__embedding_provider.get_path_embedding, positive_paths + negative_paths)))
-                test_outputs = model(embeddings.to(device))
-                test_running_total += len(embeddings)
+                test_outputs = model(embeddings)
+                test_running_total += positive_paths_count + len(negative_paths)
                 test_running_right += loss_fn(positive_paths, negative_paths, test_outputs[:positive_paths_count],
                                               test_outputs[positive_paths_count:]).sum()
 
@@ -60,7 +60,7 @@ class TEMPTrainer:
         self.__embedding_provider = embedding_provider
         self.__checkpoint_save_path = checkpoint_save_path
 
-    def __train_epoch(self, model, loss_fn, optimizer, train_loader, epoch, device,
+    def __train_epoch(self, model, loss_fn, optimizer, train_loader, epoch,
                       train_progess_monitor: TrainProgressMonitor):
         for i, batch in enumerate(train_loader):
             optimizer.zero_grad()
@@ -78,7 +78,7 @@ class TEMPTrainer:
             loss.backward()
             optimizer.step()
 
-            train_progess_monitor.step(model, epoch, i, len(train_loader), loss, loss_fn, device)
+            train_progess_monitor.step(model, epoch, i, len(train_loader), loss, loss_fn)
 
     def __save_checkpoint(self, model, optimizer, epoch):
         save_path = os.path.join(self.__checkpoint_save_path, 'temp_model_epoch_{}'.format(epoch))
@@ -87,10 +87,10 @@ class TEMPTrainer:
             'optimizer_state': optimizer.state_dict()
         }, save_path)
 
-    def train(self, model, optimizer, temp_loss, train_ds_provider, valid_loader, epochs, device):
+    def train(self, model, optimizer, temp_loss, train_ds_provider, valid_loader, epochs):
         plot_monitor = PlotMonitor()
         monitor = TrainProgressMonitor(1, valid_loader, epochs, plot_monitor, self.__embedding_provider)
         for epoch in range(epochs):
             train_loader = train_ds_provider()
-            self.__train_epoch(model, temp_loss, optimizer, train_loader, epoch, device, monitor)
+            self.__train_epoch(model, temp_loss, optimizer, train_loader, epoch, monitor)
             self.__save_checkpoint(model, optimizer, epoch)

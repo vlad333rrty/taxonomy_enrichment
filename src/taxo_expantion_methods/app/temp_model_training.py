@@ -15,42 +15,35 @@ from src.taxo_expantion_methods.datasets_processing.temp_dataset_generator impor
 def dfs(root: Synset):
     stack = [root]
     used = set()
-    visited = []
+    leafs = []
     while len(stack) > 0:
         u = stack.pop()
-        visited.append(u)
+        if len(u.hyponyms()) == 0:
+            leafs.append(u)
         for child in u.hyponyms():
             if child not in used:
                 stack.append(child)
         used.add(u)
-    return visited
+    return leafs
 
 
-def run():
-    model = TEMP(768, 192)
+def run_temp_model_training(device, epochs):
+    model = TEMP(768 * 2, 256).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.02)
-    loss_fn = TEMPLoss(0.5)
+    loss_fn = TEMPLoss(0.5).to(device)
     wn_reader = WordNetCorpusReader(Configuration.WORDNET_20_PATH, None)
-    all_synsets = list(wn_reader.all_synsets(wn_reader.NOUN))
-    # allowed_synsets = dfs(wn_reader.synset('entity.n.01'))
+    # all_synsets = list(wn_reader.all_synsets(wn_reader.NOUN))
+    all_synsets = dfs(wn_reader.synset('entity.n.01'))
 
-    train_synsets, test_synsets = train_test_split(all_synsets, train_size=0.6, test_size=0.02)
+    train_synsets, test_synsets = train_test_split(all_synsets, train_size=0.6, test_size=0.01)
     print('Train/test:', len(train_synsets), len(test_synsets))
 
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-    bert_model = BertModel.from_pretrained('bert-base-uncased')
-    ds_creator = TEMPDsCreator(all_synsets)
-    embedding_provider = TEMPEmbeddingProvider(tokenizer, bert_model)
+    bert_model = BertModel.from_pretrained('bert-base-uncased').to(device)
+    ds_creator = TEMPDsCreator(all_synsets, 1)
+    embedding_provider = TEMPEmbeddingProvider(tokenizer, bert_model, device)
     trainer = TEMPTrainer(embedding_provider, 'data/models/TEMP/checkpoints')
-    trainer.train(
-        model,
-        optimizer,
-        loss_fn,
-        lambda: ds_creator.prepare_ds(train_synsets),
-        ds_creator.prepare_ds(test_synsets),
-        10,
-        'cpu'
-    )
+    trainer.train(model, optimizer, loss_fn, lambda: ds_creator.prepare_ds(train_synsets, 4),
+                  ds_creator.prepare_ds(test_synsets, 4), epochs)
 
-
-run()
+run_temp_model_training('cpu', 1)

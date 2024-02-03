@@ -1,14 +1,13 @@
-import time
-
 from transformers import BertTokenizer, BertModel
 
 from src.taxo_expantion_methods.utils.utils import get_synset_simple_name
 
 
 class TEMPEmbeddingProvider:
-    def __init__(self, tokenizer: BertTokenizer, bert_model: BertModel):
+    def __init__(self, tokenizer: BertTokenizer, bert_model: BertModel, device):
         self.__tokenizer = tokenizer
         self.__bert_model = bert_model
+        self.__device = device
 
     def get_path_embedding(self, path):
         reversed_path = list(reversed(path))
@@ -29,8 +28,8 @@ class TEMPEmbeddingProvider:
             return_tensors='pt',
             add_special_tokens=True
         )
-        input_ids = encoding['input_ids']
-        attention_mask = encoding['attention_mask']
+        input_ids = encoding['input_ids'].to(self.__device)
+        attention_mask = encoding['attention_mask'].to(self.__device)
         outputs = self.__bert_model(input_ids, attention_mask=attention_mask)
         cls_embedding = outputs.last_hidden_state[:, 0, :]
-        return cls_embedding[0]
+        return cls_embedding.reshape(-1)

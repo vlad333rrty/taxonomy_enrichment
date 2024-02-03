@@ -34,7 +34,7 @@ class TEMPDsCreator:
         path = node.hypernym_paths()[0]
         res = [path]
         for i in range(self.__negative_samples_per_node):
-            res.append(self.__get_negative_sample(path[-1], node))
+            res.append(self.__get_negative_sample(path[-2], node))
         return res
 
     def __process_node(self, node, batches):
@@ -45,8 +45,9 @@ class TEMPDsCreator:
     def prepare_ds(self, train_synsets: [Synset], batch_size=16):
         start = time.time()
         samples = []
-        pool = ThreadPool(8)
-        pool.map(lambda n: self.__process_node(n, samples), train_synsets)
+        list(map(lambda n: self.__process_node(n, samples), train_synsets))
+        for synset in train_synsets:
+            self.__process_node(synset, samples)
         end = time.time()
         print('Finised creating samples in', end - start, 'seconds')
 
