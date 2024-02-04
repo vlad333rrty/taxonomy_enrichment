@@ -35,7 +35,7 @@ def run_temp_model_training(device, epochs):
     # all_synsets = list(wn_reader.all_synsets(wn_reader.NOUN))
     all_synsets = dfs(wn_reader.synset('entity.n.01'))
 
-    train_synsets, test_synsets = train_test_split(all_synsets, train_size=0.6, test_size=0.01)
+    train_synsets, test_synsets = train_test_split(all_synsets, train_size=0.75, test_size=0.1)
     print('Train/test:', len(train_synsets), len(test_synsets))
 
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
@@ -45,5 +45,3 @@ def run_temp_model_training(device, epochs):
     trainer = TEMPTrainer(embedding_provider, 'data/models/TEMP/checkpoints')
     trainer.train(model, optimizer, loss_fn, lambda: ds_creator.prepare_ds(train_synsets, 32),
                   ds_creator.prepare_ds(test_synsets, 32), epochs)
-
-run_temp_model_training('cpu', 1)
