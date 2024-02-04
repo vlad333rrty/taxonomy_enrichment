@@ -44,6 +44,6 @@ def run_temp_model_training(device, epochs):
     embedding_provider = TEMPEmbeddingProvider(tokenizer, bert_model, device)
     trainer = TEMPTrainer(embedding_provider, 'data/models/TEMP/checkpoints')
     trainer.train(model, optimizer, loss_fn, lambda: ds_creator.prepare_ds(train_synsets, 32),
-                  ds_creator.prepare_ds(test_synsets, 32)[:5], epochs)
+                  ds_creator.prepare_ds(test_synsets, 32), epochs)
 
 run_temp_model_training('cpu', 1)
