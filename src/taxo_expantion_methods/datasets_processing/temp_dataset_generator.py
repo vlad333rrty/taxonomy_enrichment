@@ -44,7 +44,6 @@ class TEMPDsCreator:
         return res
 
     def __process_node(self, node, batches):
-        print('Processing node', node)
         samples = self.__collect_sample_paths(node)
         batches.append(samples)
 

@@ -47,6 +47,7 @@ class TrainProgressMonitor:
                 test_running_total += positive_paths_count + len(negative_paths)
                 test_running_right += loss_fn(positive_paths, negative_paths, test_outputs[:positive_paths_count],
                                               test_outputs[positive_paths_count:]).sum()
+                embeddings.detach()
 
             test_loss = test_running_right / test_running_total
             print(f'Test loss: {test_loss:.3f}')
