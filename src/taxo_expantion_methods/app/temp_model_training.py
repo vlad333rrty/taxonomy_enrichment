@@ -27,8 +27,8 @@ def dfs(root: Synset):
     return leafs
 
 
-def run_temp_model_training(device, epochs):
-    model = TEMP(768 * 2, 256).to(device)
+def run_temp_model_training(device, epochs, model):
+    model = model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=2e-5, betas=(0.9, 0.999))
     loss_fn = TEMPLoss(0.2).to(device)
     wn_reader = WordNetCorpusReader(Configuration.WORDNET_20_PATH, None)
