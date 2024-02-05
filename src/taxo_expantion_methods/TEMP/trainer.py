@@ -1,15 +1,10 @@
 # TODO переделать потом на архитектуру с базовым тренером и моделью
 import os
-import time
 
 import torch
-from transformers import BertTokenizer, BertModel
 
 from src.taxo_expantion_methods.TEMP.plot_monitor import PlotMonitor, Metric
 from src.taxo_expantion_methods.TEMP.temp_embeddings_provider import TEMPEmbeddingProvider
-from src.taxo_expantion_methods.common import performance
-from src.taxo_expantion_methods.datasets_processing.temp_dataset_generator import TEMPDsCreator
-from src.taxo_expantion_methods.utils.utils import get_synset_simple_name
 
 
 class TrainProgressMonitor:
@@ -68,11 +63,8 @@ class TEMPTrainer:
             positive_paths = batch.positive_paths
             negative_paths = batch.negative_paths
             positive_paths_count = len(positive_paths)
-            start = time.time()
             embeddings = torch.stack(
                 list(map(self.__embedding_provider.get_path_embedding, positive_paths + negative_paths)))
-            print('Got embeddings for {} positive and {} negative samples in {}s'.format(positive_paths_count,
-                  len(negative_paths), time.time() - start))
 
             output = model(embeddings)
             loss = loss_fn(positive_paths, negative_paths, output[:positive_paths_count], output[positive_paths_count:])
@@ -83,10 +75,7 @@ class TEMPTrainer:
 
     def __save_checkpoint(self, model, optimizer, epoch):
         save_path = os.path.join(self.__checkpoint_save_path, 'temp_model_epoch_{}'.format(epoch))
-        torch.save({
-            'model_state': model.state_dict(),
-            'optimizer_state': optimizer.state_dict()
-        }, save_path)
+        torch.save(model.state_dict(), save_path)
 
     def train(self, model, optimizer, temp_loss, train_ds_provider, valid_loader, epochs):
         plot_monitor = PlotMonitor()
