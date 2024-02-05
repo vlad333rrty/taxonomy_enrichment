@@ -60,7 +60,8 @@ class TEMPTrainer:
     def __train_epoch(self, model, loss_fn, optimizer, train_loader, epoch,
                       train_progess_monitor: TrainProgressMonitor):
         for i, batch in (pbar := tqdm(enumerate(train_loader))):
-            pbar.set_description(f'EPOCH: {epoch}, BATCH: {i}')
+            batch_num = i + 1
+            pbar.set_description(f'EPOCH: {epoch}, BATCH: {batch_num}')
             optimizer.zero_grad()
             positive_paths = batch.positive_paths
             negative_paths = batch.negative_paths
@@ -73,7 +74,7 @@ class TEMPTrainer:
             loss.backward()
             optimizer.step()
 
-            train_progess_monitor.step(model, epoch, i, len(train_loader), loss, loss_fn)
+            train_progess_monitor.step(model, epoch, batch_num, len(train_loader), loss, loss_fn)
 
     def __save_checkpoint(self, model, optimizer, epoch):
         save_path = os.path.join(self.__checkpoint_save_path, 'temp_model_epoch_{}'.format(epoch))
