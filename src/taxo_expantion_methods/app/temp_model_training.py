@@ -26,7 +26,7 @@ def __dfs(root: Synset):
     return leafs
 
 
-def run_temp_model_training(device, epochs, model):
+def run_temp_model_training(device, epochs, model, batch_size=32):
     model = model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=2e-5, betas=(0.9, 0.999))
     loss_fn = TEMPLoss(0.2).to(device)
@@ -42,5 +42,5 @@ def run_temp_model_training(device, epochs, model):
     ds_creator = TEMPDsCreator(all_synsets, 1)
     embedding_provider = TEMPEmbeddingProvider(tokenizer, bert_model, device)
     trainer = TEMPTrainer(embedding_provider, 'data/models/TEMP/checkpoints')
-    trainer.train(model, optimizer, loss_fn, lambda: ds_creator.prepare_ds(train_synsets, 32)[:2],
-                  ds_creator.prepare_ds(test_synsets, 32)[:2], epochs)
+    trainer.train(model, optimizer, loss_fn, lambda: ds_creator.prepare_ds(train_synsets, batch_size),
+                  ds_creator.prepare_ds(test_synsets, batch_size), epochs)

@@ -2,6 +2,7 @@
 import os
 
 import torch
+from tqdm import tqdm
 
 from src.taxo_expantion_methods.TEMP.plot_monitor import PlotMonitor, Metric
 from src.taxo_expantion_methods.TEMP.temp_embeddings_provider import TEMPEmbeddingProvider
@@ -58,7 +59,8 @@ class TEMPTrainer:
 
     def __train_epoch(self, model, loss_fn, optimizer, train_loader, epoch,
                       train_progess_monitor: TrainProgressMonitor):
-        for i, batch in enumerate(train_loader):
+        for i, batch in (pbar := tqdm(enumerate(train_loader))):
+            pbar.set_description(f'EPOCH: {epoch}, BATCH: {i}')
             optimizer.zero_grad()
             positive_paths = batch.positive_paths
             negative_paths = batch.negative_paths
