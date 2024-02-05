@@ -13,6 +13,6 @@ args = args.parse_args()
 
 model = TEMP(768 * 2, 256)
 if args.load_path is not None:
-    model = model.load_state_dict(torch.load(args.load_state, map_location=torch.device(args.device)))
+    model = model.load_state_dict(torch.load(args.load_path, map_location=torch.device(args.device)))
 
 run_temp_model_training(args.device, args.epochs, model)
