@@ -46,7 +46,12 @@ class TaxoScorer:
             terms_and_parents = list(map(lambda x: x.split('\t'), file.readlines()))
         term2parent = {}
         for pair in terms_and_parents:
-            term2parent[pair[0]] = pair[1].split(',')
+            term = pair[0]
+            parents = pair[1].split(',')
+            if term in term2parent:
+                term2parent[term] += parents
+            else:
+                term2parent[term] = parents
         return term2parent
 
     @staticmethod

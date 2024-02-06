@@ -1,3 +1,5 @@
+from multiprocessing.pool import ThreadPool
+
 import torch
 from tqdm import tqdm
 from transformers import BertTokenizer, BertModel
@@ -55,4 +57,14 @@ def infer(model, term, device):
     bert_model = BertModel.from_pretrained('bert-base-uncased').to(device)
     inference_performer = TEMPTermInferencePerformer(all_synsets, TEMPEmbeddingProvider(tokenizer, bert_model, device))
     result = inference_performer.infer(model, term)
+    return result
+
+def infer_many_async(model, terms, device, workers):
+    wn_reader = WordNetDao.get_wn_20()
+    all_synsets = SynsetsProvider.get_all_synsets_with_common_root(wn_reader.synset('entity.n.01'))
+    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    bert_model = BertModel.from_pretrained('bert-base-uncased').to(device)
+    inference_performer = TEMPTermInferencePerformer(all_synsets, TEMPEmbeddingProvider(tokenizer, bert_model, device))
+    pool = ThreadPool(workers)
+    result = pool.map(lambda term: inference_performer.infer(model, term), terms)
     return result
