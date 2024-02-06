@@ -31,7 +31,7 @@ terms = read_terms(args.terms_path, args.limit)
 terms = list(map(lambda x: Term(x, wn_reader.synsets(x)[0].definition()), terms))
 model = TEMP(768 * 2, 256).to(args.device)
 model.load_state_dict(torch.load(args.load_path, map_location=torch.device(args.device)))
-delta, results = performance.measure(lambda: infer_many_async(model, terms, args.device, 4))
+delta, results = performance.measure(lambda: infer_many_async(model, terms, args.device, 1))
 print(delta)
 print(results)
 

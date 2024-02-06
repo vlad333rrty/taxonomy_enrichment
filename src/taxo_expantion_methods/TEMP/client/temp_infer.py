@@ -43,7 +43,7 @@ class TEMPTermInferencePerformer:
                     if current_score > max_score:
                         max_score = current_score
                         best_item = candidate_path
-        return best_item
+        return best_item, max_score
 
     def __get_score_for_path(self, model, path):
         embedding = self.__embedding_provider.get_path_embedding(path)

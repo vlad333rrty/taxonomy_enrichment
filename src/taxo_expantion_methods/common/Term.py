@@ -8,3 +8,6 @@ class Term:
 
     def value(self):
         return self.value
+
+    def __str__(self):
+        return self.value
