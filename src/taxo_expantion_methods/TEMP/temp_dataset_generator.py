@@ -1,10 +1,7 @@
 import random
 import time
-from multiprocessing.pool import ThreadPool
 
 from nltk.corpus.reader import Synset
-
-from src.taxo_expantion_methods.TEMP.plot_monitor import PlotMonitor
 
 
 class PathsBatch:
@@ -14,7 +11,7 @@ class PathsBatch:
 
 
 class TEMPDsCreator:
-    def __init__(self, all_synsets, negative_samples_per_node=4):
+    def __init__(self, all_synsets, negative_samples_per_node=1):
         self.__all_synsets = all_synsets
         self.__negative_samples_per_node = negative_samples_per_node
 
