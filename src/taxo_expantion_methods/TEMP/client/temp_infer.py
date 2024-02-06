@@ -1,5 +1,4 @@
 import torch
-from nltk.corpus import WordNetCorpusReader
 from tqdm import tqdm
 from transformers import BertTokenizer, BertModel
 
@@ -7,7 +6,7 @@ from src.taxo_expantion_methods.TEMP.synsets_provider import SynsetsProvider
 from src.taxo_expantion_methods.TEMP.temp_embeddings_provider import TEMPEmbeddingProvider
 from src.taxo_expantion_methods.TEMP.temp_model import TEMP
 from src.taxo_expantion_methods.common.Term import Term
-from src.taxo_expantion_methods.common.configuration import Configuration
+from src.taxo_expantion_methods.common.wn_dao import WordNetDao
 
 
 class _TermSynsetAdapter:
@@ -50,7 +49,7 @@ class TEMPTermInferencePerformer:
 
 
 def infer(model, term, device):
-    wn_reader = WordNetCorpusReader(Configuration.WORDNET_20_PATH, None)
+    wn_reader = WordNetDao.get_wn_20()
     all_synsets = SynsetsProvider.get_all_synsets_with_common_root(wn_reader.synset('entity.n.01'))
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
     bert_model = BertModel.from_pretrained('bert-base-uncased').to(device)
