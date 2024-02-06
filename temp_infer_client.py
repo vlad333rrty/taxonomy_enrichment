@@ -10,7 +10,7 @@ from src.taxo_expantion_methods.common.wn_dao import WordNetDao
 
 args = argparse.ArgumentParser(description='Training taxonomy expansion model')
 args.add_argument('-d', '--device', default='cpu', type=str, help='used device')
-args.add_argument('-t', '--term', default=None, type=int, help='term to infer')
+args.add_argument('-t', '--term', default=None, type=str, help='term to infer')
 args.add_argument('-l', '--load-path', default=None, type=str, help='path to saved model')
 args = args.parse_args()
 
