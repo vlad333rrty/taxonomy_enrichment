@@ -38,8 +38,7 @@ class TrainProgressMonitor:
                     positive_paths = batch.positive_paths
                     negative_paths = batch.negative_paths
                     positive_paths_count = len(positive_paths)
-                    embeddings = torch.stack(
-                        list(map(self.__embedding_provider.get_path_embedding, positive_paths + negative_paths)))
+                    embeddings = self.__embedding_provider.get_path_embeddings(positive_paths + negative_paths)
                     test_outputs = model(embeddings)
                     test_running_total += positive_paths_count + len(negative_paths)
                     test_running_right += loss_fn(positive_paths, negative_paths, test_outputs[:positive_paths_count],
@@ -66,8 +65,7 @@ class TEMPTrainer:
             positive_paths = batch.positive_paths
             negative_paths = batch.negative_paths
             positive_paths_count = len(positive_paths)
-            embeddings = torch.stack(
-                list(map(self.__embedding_provider.get_path_embedding, positive_paths + negative_paths)))
+            embeddings = self.__embedding_provider.get_path_embeddings(positive_paths + negative_paths)
 
             output = model(embeddings)
             loss = loss_fn(positive_paths, negative_paths, output[:positive_paths_count], output[positive_paths_count:])

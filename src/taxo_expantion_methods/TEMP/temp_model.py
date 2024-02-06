@@ -3,7 +3,7 @@ from transformers import BertModel, BertTokenizer
 
 
 class TEMP(nn.Module):
-    def __init__(self, in_dim, hidden_dim):
+    def __init__(self, in_dim=768, hidden_dim=256):
         super(TEMP, self).__init__()
         self.model = nn.Sequential(
             nn.Linear(in_dim, hidden_dim),

@@ -9,17 +9,14 @@ class TEMPEmbeddingProvider:
         self.__bert_model = bert_model
         self.__device = device
 
-    def get_path_embedding(self, path):
-        reversed_path = list(reversed(path))
-        tokens = [
-            reversed_path[0].definition(),
-            ' '.join(
-                map(
-                    lambda x: get_synset_simple_name(x),
-                    reversed_path[1:]
-                )
+    def get_path_embeddings(self, batch):
+        tokens = []
+        for path in batch:
+            reversed_path = list(reversed(path))
+            tokens.append(
+                '{} [SEP] {}'.format(reversed_path[0].definition(),
+                                     ' '.join(map(lambda x: get_synset_simple_name(x), reversed_path[1:])))
             )
-        ]
 
         encoding = self.__tokenizer.batch_encode_plus(
             tokens,
@@ -32,4 +29,4 @@ class TEMPEmbeddingProvider:
         attention_mask = encoding['attention_mask'].to(self.__device)
         outputs = self.__bert_model(input_ids, attention_mask=attention_mask)
         cls_embedding = outputs.last_hidden_state[:, 0, :]
-        return cls_embedding.reshape(-1)
+        return cls_embedding

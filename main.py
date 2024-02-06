@@ -11,7 +11,7 @@ args.add_argument('-e', '--epochs', default=None, type=int, help='number of epoc
 args.add_argument('-l', '--load-path', default=None, type=str, help='path to saved model')
 args = args.parse_args()
 
-model = TEMP(768 * 2, 256)
+model = TEMP()
 if args.load_path is not None:
     model.load_state_dict(torch.load(args.load_path, map_location=torch.device(args.device)))
 

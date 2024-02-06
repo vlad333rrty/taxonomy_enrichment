@@ -2,7 +2,6 @@ import argparse
 
 import torch
 
-from src.taxo_expantion_methods.TEMP.client.temp_infer import infer_many_async
 from src.taxo_expantion_methods.TEMP.temp_model import TEMP
 from src.taxo_expantion_methods.common import performance
 from src.taxo_expantion_methods.common.Term import Term
@@ -29,11 +28,11 @@ wn_reader = WordNetDao.get_wn_30()
 terms = read_terms(args.terms_path, args.limit)
 
 terms = list(map(lambda x: Term(x, wn_reader.synsets(x)[0].definition()), terms))
-model = TEMP(768 * 2, 256).to(args.device)
+model = TEMP().to(args.device)
 model.load_state_dict(torch.load(args.load_path, map_location=torch.device(args.device)))
-delta, results = performance.measure(lambda: infer_many_async(model, terms, args.device, 1))
-print(delta)
-print(results)
+# delta, results = performance.measure(lambda: infer_many_async(model, terms, args.device, 1))
+# print(delta)
+# print(results)
 
 
 def save(results, path):
@@ -47,4 +46,4 @@ def save(results, path):
         file.write(res_str)
 
 
-save(results, args.result_path)
+# save(results, args.result_path)
