@@ -12,9 +12,9 @@ from src.taxo_expantion_methods.utils.utils import paginate
 
 device = 'cpu'
 terms_path = 'data/datasets/diachronic-wordnets/en/no_labels_nouns_en.2.0-3.0.tsv'
-load_path = 'data/models/TEMP/pre-trained/temp_model_epoch_7'
+load_path = 'data/models/TEMP/pre-trained/temp_model_epoch_10'
 result_path = 'data/results/TEMP/predicted.tsv'
-limit = 100
+limit = 10
 
 
 def read_terms(path, _limit):
@@ -63,6 +63,6 @@ def run(terms_batch):
     print('Got result for {} terms'.format(len(terms_batch)))
 
 
-pool = ThreadPool(1)
+pool = ThreadPool(2)
 batches = paginate(terms, 2)
 pool.map(run, batches)
