@@ -19,3 +19,9 @@ class PaginationTest(unittest.TestCase):
         self.assertEquals([1, 2], pages[0])
         self.assertEquals([3, 4], pages[1])
         self.assertEquals([5], pages[2])
+
+    def test_batch_size_is_greater_then_array_len(self):
+        array = [1]
+        pages = paginate(array, 2)
+        self.assertEquals(1, len(pages))
+        self.assertEquals([1], pages[0])

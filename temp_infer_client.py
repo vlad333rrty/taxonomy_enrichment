@@ -1,3 +1,4 @@
+import threading
 from multiprocessing.pool import ThreadPool
 
 import torch
@@ -11,9 +12,9 @@ from src.taxo_expantion_methods.utils.utils import paginate
 
 device = 'cpu'
 terms_path = 'data/datasets/diachronic-wordnets/en/no_labels_nouns_en.2.0-3.0.tsv'
-load_path = 'data/models/TEMP/pre-trained/temp_model_epoch_8'
+load_path = 'data/models/TEMP/pre-trained/temp_model_epoch_7'
 result_path = 'data/results/TEMP/predicted.tsv'
-limit = 8
+limit = 100
 
 
 def read_terms(path, _limit):
@@ -34,19 +35,6 @@ model.load_state_dict(torch.load(load_path, map_location=torch.device(device)))
 inference_performer = TEMPTermInferencePerformerFactory.create(device, 16)
 
 
-def run(terms_batch):
-    delta, results = performance.measure(lambda: inference_performer.infer(model, terms))
-    print(delta)
-    print(results)
-    result = list(map(lambda x: x[1], results))
-    return terms_batch, result
-
-
-pool = ThreadPool(4)
-batches = paginate(terms, 2)
-all_results = pool.map(run, batches)
-
-
 def format_result(_terms, results):
     res_str = ''
     for i in range(len(_terms)):
@@ -59,12 +47,22 @@ def format_result(_terms, results):
     return res_str
 
 
-formatted = ''.join(list(
-    map(
-        lambda x: format_result(x[0], x[1]),
-        all_results
-    )
-))
+file_write_lock = threading.Lock()
 
-with open(result_path, 'w') as file:
-    file.write(formatted)
+
+def run(terms_batch):
+    delta, results = performance.measure(lambda: inference_performer.infer(model, terms_batch))
+    print(delta)
+    print(results)
+    result = list(map(lambda x: x[1], results))
+    res_str = format_result(terms_batch, result)
+    file_write_lock.acquire()
+    with open(result_path, 'a') as append_file:
+        append_file.write(res_str)
+    file_write_lock.release()
+    print('Got result for {} terms'.format(len(terms_batch)))
+
+
+pool = ThreadPool(1)
+batches = paginate(terms, 2)
+pool.map(run, batches)
