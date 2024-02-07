@@ -8,14 +8,11 @@ from src.taxo_expantion_methods.common import performance
 from src.taxo_expantion_methods.common.Term import Term
 from src.taxo_expantion_methods.common.wn_dao import WordNetDao
 
-args = argparse.ArgumentParser(description='Training taxonomy expansion model')
-args.add_argument('-d', '--device', default='cpu', type=str, help='used device')
-args.add_argument('-t', '--terms_path', default=None, type=str, help='terms to infer dataset path')
-args.add_argument('-load', '--load-path', default=None, type=str, help='path to saved model')
-args.add_argument('-l', '--limit', default=None, type=int, help='terms limit')
-args.add_argument('-res', '--result-path', default=None, type=str, help='Result path')
-args = args.parse_args()
-
+device = 'cpu'
+terms_path = 'data/datasets/diachronic-wordnets/en/no_labels_nouns_en.2.0-3.0.tsv'
+load_path = 'data/models/TEMP/pre-trained/temp_model_epoch_8'
+result_path = 'data/results/TEMP'
+limit = 2
 
 def read_terms(path, limit):
     with open(path, 'r') as file:
@@ -26,12 +23,12 @@ def read_terms(path, limit):
 
 
 wn_reader = WordNetDao.get_wn_30()
-terms = read_terms(args.terms_path, args.limit)
+terms = read_terms(terms_path, limit)
 
 terms = list(map(lambda x: Term(x, wn_reader.synsets(x)[0].definition()), terms))
-model = TEMP().to(args.device)
-model.load_state_dict(torch.load(args.load_path, map_location=torch.device(args.device)))
-delta, results = performance.measure(lambda: infer_many(model, terms, args.device))
+model = TEMP().to(device)
+model.load_state_dict(torch.load(load_path, map_location=torch.device(device)))
+delta, results = performance.measure(lambda: infer_many(model, terms, device))
 print(delta)
 print(results)
 
@@ -47,4 +44,4 @@ def save(results, path):
         file.write(res_str)
 
 
-save(results, args.result_path)
+save(results, result_path)
