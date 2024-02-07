@@ -8,9 +8,9 @@ from src.taxo_expantion_methods.common.wn_dao import WordNetDao
 
 device = 'cpu'
 terms_path = 'data/datasets/diachronic-wordnets/en/no_labels_nouns_en.2.0-3.0.tsv'
-load_path = 'data/models/TEMP/pre-trained/temp_model_epoch_8'
-result_path = 'data/results/TEMP/predicted/.tsv'
-limit = 2
+load_path = 'data/models/TEMP/pre-trained/temp_model_epoch_5'
+result_path = 'data/results/TEMP/predicted.tsv'
+limit = 1
 
 
 def read_terms(path, limit):
@@ -28,9 +28,9 @@ terms = list(map(lambda x: Term(x, wn_reader.synsets(x)[0].definition()), terms)
 model = TEMP().to(device)
 model.load_state_dict(torch.load(load_path, map_location=torch.device(device)))
 
-inference_performer = TEMPTermInferencePerformerFactory.create(device, 128)
+inference_performer = TEMPTermInferencePerformerFactory.create(device, 16)
 
-delta, results = performance.measure(lambda: inference_performer.infer(model, terms, device))
+delta, results = performance.measure(lambda: inference_performer.infer(model, terms))
 print(delta)
 print(results)
 

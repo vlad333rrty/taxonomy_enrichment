@@ -21,11 +21,11 @@ class TEMPDsCreator:
             if path[0].name() == 'entity.n.01':
                 return path
 
-    def __get_negative_sample(self, parent, node):
+    def __get_negative_sample(self, parents, node):
         random_node = random.choice(self.__all_synsets)
         i = 0
         while True:
-            if random_node == parent:
+            if random_node in parents:
                 random_node = random.choice(self.__all_synsets)
             else:
                 break
@@ -37,7 +37,7 @@ class TEMPDsCreator:
         path = self.__select_path(node)
         res = [path]
         for i in range(self.__negative_samples_per_node):
-            res.append(self.__get_negative_sample(path[-2], node))
+            res.append(self.__get_negative_sample(set(node.hypernyms()), node))
         return res
 
     def __process_node(self, node, batches):
