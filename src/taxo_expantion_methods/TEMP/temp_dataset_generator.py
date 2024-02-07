@@ -47,7 +47,6 @@ class TEMPDsCreator:
     def prepare_ds(self, train_synsets: [Synset], batch_size=16):
         start = time.time()
         samples = []
-        list(map(lambda n: self.__process_node(n, samples), train_synsets))
         for synset in train_synsets:
             self.__process_node(synset, samples)
         end = time.time()
