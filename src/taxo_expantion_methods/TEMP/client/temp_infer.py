@@ -47,12 +47,13 @@ class TEMPTermInferencePerformer:
 
     def __update_scores(self, offset, scores, candidate_paths, result_buffer):
         for i in range(len(result_buffer)):
+            j = offset + i
             item = result_buffer[i]
-            score = scores[offset + i]
+            score = scores[j]
             if item is None:
-                result_buffer[i] = (score, candidate_paths[i])
+                result_buffer[i] = (score, candidate_paths[j])
             elif item[0] < score:
-                result_buffer[i] = (score, candidate_paths[i])
+                result_buffer[i] = (score, candidate_paths[j])
 
     def __get_candidates_paths(self, taxonomy_paths, terms):
         candidate_paths = []
@@ -68,7 +69,7 @@ class TEMPTermInferencePerformer:
 def infer_many(model, terms, device):
     wn_reader = WordNetDao.get_wn_20()
     all_synsets = SynsetsProvider.get_all_synsets_with_common_root(wn_reader.synset('entity.n.01'))
-    synsets_batches = create_synsets_batch(all_synsets, 8)
+    synsets_batches = create_synsets_batch(all_synsets, 32)
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
     bert_model = BertModel.from_pretrained('bert-base-uncased').to(device)
     inference_performer = TEMPTermInferencePerformer(synsets_batches,
