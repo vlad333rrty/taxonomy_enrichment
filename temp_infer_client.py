@@ -1,6 +1,6 @@
 import torch
 
-from src.taxo_expantion_methods.TEMP.client.temp_infer import infer_many
+from src.taxo_expantion_methods.TEMP.client.temp_infer import TEMPTermInferencePerformerFactory
 from src.taxo_expantion_methods.TEMP.temp_model import TEMP
 from src.taxo_expantion_methods.common import performance
 from src.taxo_expantion_methods.common.Term import Term
@@ -27,7 +27,10 @@ terms = read_terms(terms_path, limit)
 terms = list(map(lambda x: Term(x, wn_reader.synsets(x)[0].definition()), terms))
 model = TEMP().to(device)
 model.load_state_dict(torch.load(load_path, map_location=torch.device(device)))
-delta, results = performance.measure(lambda: infer_many(model, terms, device))
+
+inference_performer = TEMPTermInferencePerformerFactory.create(device, 128)
+
+delta, results = performance.measure(lambda: inference_performer.infer(model, terms, device))
 print(delta)
 print(results)
 

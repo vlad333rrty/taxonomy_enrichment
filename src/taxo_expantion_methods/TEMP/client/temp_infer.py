@@ -66,23 +66,12 @@ class TEMPTermInferencePerformer:
         return model(embeddings)
 
 
-def infer_many(model, terms, device):
-    wn_reader = WordNetDao.get_wn_20()
-    all_synsets = SynsetsProvider.get_all_synsets_with_common_root(wn_reader.synset('entity.n.01'))
-    synsets_batches = create_synsets_batch(all_synsets, 64)
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-    bert_model = BertModel.from_pretrained('bert-base-uncased').to(device)
-    inference_performer = TEMPTermInferencePerformer(synsets_batches,
-                                                     TEMPEmbeddingProvider(tokenizer, bert_model, device))
-    result = inference_performer.infer(model, terms)
-    return result
-
-# def infer_many_async(model, terms, device, workers):
-#     wn_reader = WordNetDao.get_wn_20()
-#     all_synsets = SynsetsProvider.get_all_synsets_with_common_root(wn_reader.synset('entity.n.01'))
-#     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-#     bert_model = BertModel.from_pretrained('bert-base-uncased').to(device)
-#     inference_performer = TEMPTermInferencePerformer(all_synsets, TEMPEmbeddingProvider(tokenizer, bert_model, device))
-#     pool = ThreadPool(workers)
-#     result = pool.map(lambda term: inference_performer.infer(model, term), terms)
-#     return result
+class TEMPTermInferencePerformerFactory:
+    @staticmethod
+    def create(device, batch_size):
+        wn_reader = WordNetDao.get_wn_20()
+        all_synsets = SynsetsProvider.get_all_synsets_with_common_root(wn_reader.synset('entity.n.01'))
+        synsets_batches = create_synsets_batch(all_synsets, batch_size)
+        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        bert_model = BertModel.from_pretrained('bert-base-uncased').to(device)
+        return TEMPTermInferencePerformer(synsets_batches, TEMPEmbeddingProvider(tokenizer, bert_model, device))
