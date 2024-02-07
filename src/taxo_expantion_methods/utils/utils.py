@@ -13,8 +13,10 @@ def paginate(entries, page_size):
             index = j * page_size + r
             page.append(entries[index])
         result.append(page)
-    page = []
     i = k * page_size
+    if i == len(entries):
+        return result
+    page = []
     while i < len(entries):
         page.append(entries[i])
         i += 1

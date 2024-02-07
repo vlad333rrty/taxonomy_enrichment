@@ -44,7 +44,7 @@ class TEMPDsCreator:
         samples = self.__collect_sample_paths(node)
         batches.append(samples)
 
-    def prepare_ds(self, train_synsets: [Synset], batch_size=16):
+    def prepare_ds(self, train_synsets: [Synset], batch_size):
         start = time.time()
         samples = []
         for synset in train_synsets:
