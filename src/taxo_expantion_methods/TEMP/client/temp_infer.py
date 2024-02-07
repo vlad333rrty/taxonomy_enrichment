@@ -69,7 +69,7 @@ class TEMPTermInferencePerformer:
 def infer_many(model, terms, device):
     wn_reader = WordNetDao.get_wn_20()
     all_synsets = SynsetsProvider.get_all_synsets_with_common_root(wn_reader.synset('entity.n.01'))
-    synsets_batches = create_synsets_batch(all_synsets, 32)
+    synsets_batches = create_synsets_batch(all_synsets, 64)
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
     bert_model = BertModel.from_pretrained('bert-base-uncased').to(device)
     inference_performer = TEMPTermInferencePerformer(synsets_batches,

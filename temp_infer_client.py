@@ -1,5 +1,3 @@
-import argparse
-
 import torch
 
 from src.taxo_expantion_methods.TEMP.client.temp_infer import infer_many
@@ -11,8 +9,9 @@ from src.taxo_expantion_methods.common.wn_dao import WordNetDao
 device = 'cpu'
 terms_path = 'data/datasets/diachronic-wordnets/en/no_labels_nouns_en.2.0-3.0.tsv'
 load_path = 'data/models/TEMP/pre-trained/temp_model_epoch_8'
-result_path = 'data/results/TEMP'
+result_path = 'data/results/TEMP/predicted/.tsv'
 limit = 2
+
 
 def read_terms(path, limit):
     with open(path, 'r') as file:
