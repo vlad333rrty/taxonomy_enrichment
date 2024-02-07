@@ -1,8 +1,4 @@
-from multiprocessing.pool import ThreadPool
-
 import torch
-from torch.utils.data import Dataset, DataLoader
-from torch.utils.data.dataset import T_co
 from tqdm import tqdm
 from transformers import BertTokenizer, BertModel
 
@@ -41,19 +37,18 @@ class TEMPTermInferencePerformer:
                 candidate_paths = self.__get_candidates_paths(paths, term_sysnet_adapters)
                 current_scores = self.__get_scores_for_path(model, candidate_paths)
                 for i in range(len(paths)):
-                    self.__update_scores(i * len(term_sysnet_adapters), current_scores, candidate_paths,
+                    self.__update_scores(i * len(term_sysnet_adapters), current_scores, paths[i],
                                          scores_and_paths)
         return scores_and_paths
 
-    def __update_scores(self, offset, scores, candidate_paths, result_buffer):
+    def __update_scores(self, offset, scores, candidate_path, result_buffer):
         for i in range(len(result_buffer)):
-            j = offset + i
             item = result_buffer[i]
-            score = scores[j]
+            score = scores[offset + i]
             if item is None:
-                result_buffer[i] = (score, candidate_paths[j])
+                result_buffer[i] = (score, candidate_path)
             elif item[0] < score:
-                result_buffer[i] = (score, candidate_paths[j])
+                result_buffer[i] = (score, candidate_path)
 
     def __get_candidates_paths(self, taxonomy_paths, terms):
         candidate_paths = []
