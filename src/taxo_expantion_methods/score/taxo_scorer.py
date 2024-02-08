@@ -2,6 +2,7 @@ from nltk.corpus import WordNetCorpusReader
 from nltk.corpus.reader import Synset
 
 import src.taxo_expantion_methods.common.performance
+from src.taxo_expantion_methods.common.wn_dao import WordNetDao
 
 
 class TaxoScorer:
@@ -41,9 +42,9 @@ class TaxoScorer:
         return (2.0 * depth) / (len1 + len2)
 
     @staticmethod
-    def __parse_input(path):
+    def __parse_input(path, sep='\t'):
         with open(path, 'r') as file:
-            terms_and_parents = list(map(lambda x: x.split('\t'), file.readlines()))
+            terms_and_parents = list(map(lambda x: x.split(sep), file.readlines()))
         term2parent = {}
         for pair in terms_and_parents:
             term = pair[0]
@@ -86,7 +87,7 @@ class TaxoScorer:
         :return: (recall, wup)
         """
         etalon_term2parent = TaxoScorer.__parse_input(golden_path)
-        predicted_term2parent = TaxoScorer.__parse_input(predicted_path)
+        predicted_term2parent = TaxoScorer.__parse_input(predicted_path, ' ')
         coverage = 0
         wup = 0
         for term in etalon_term2parent:
@@ -103,10 +104,9 @@ class TaxoScorer:
 
 
 def run_scorer():
-    delta, wn_reader = src.taxo_expantion_methods.common.performance.measure(lambda: WordNetCorpusReader('data/wordnets/WordNet-3.0/dict', None))
-    print('Loaded wordnet in', delta, 'seconds')
+    wn_reader = WordNetDao.get_wn_30()
     scorer = TaxoScorer(wn_reader)
-    results = scorer.score_taxo_results('score/golden.tsv', 'score/predicted_on_full_learn.tsv')
+    results = scorer.score_taxo_results('data/results/TEMP/golden.tsv', 'data/results/TEMP/predicted.tsv')
     print(results)
 
 

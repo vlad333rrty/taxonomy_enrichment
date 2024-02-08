@@ -28,7 +28,11 @@ def read_terms(path, _limit):
 wn_reader = WordNetDao.get_wn_30()
 terms = read_terms(terms_path, limit)
 
-terms = list(map(lambda x: Term(x, wn_reader.synsets(x)[0].definition()), terms))
+res_terms = []
+for term in terms:
+    synsets = wn_reader.synsets(term)
+    res_terms += list(map(lambda x: Term(term, x.definition()), synsets))
+
 model = TEMP().to(device)
 model.load_state_dict(torch.load(load_path, map_location=torch.device(device)))
 
@@ -64,5 +68,5 @@ def run(terms_batch):
 
 
 pool = ThreadPool(2)
-batches = paginate(terms, 2)
+batches = paginate(res_terms, 2)
 pool.map(run, batches)
