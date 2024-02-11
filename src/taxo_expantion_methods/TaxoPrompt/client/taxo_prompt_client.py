@@ -12,7 +12,7 @@ from src.taxo_expantion_methods.TaxoPrompt.trainer import TaxoPromptTrainer
 from src.taxo_expantion_methods.common.wn_dao import WordNetDao
 
 
-def run(device, epochs, load_path=None):
+def run(device, epochs, batch_size, load_path=None):
     wn_reader = WordNetDao.get_wn_20()
     root_synset = wn_reader.synset('entity.n.01')
     taxo_graph = create_extended_taxo_graph(root_synset)
@@ -25,7 +25,7 @@ def run(device, epochs, load_path=None):
     print('Train size:', len(X_train))
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
     start = time.time()
-    ds = TaxoPromptDsCreator(tokenizer).prepare_ds(X_train, 6, 5, 32)
+    ds = TaxoPromptDsCreator(tokenizer).prepare_ds(X_train, 6, 5, batch_size)
     end = time.time()
     print('Created ds in', end - start)
 
