@@ -2,10 +2,12 @@ import time
 
 import torch
 from sklearn.model_selection import train_test_split
-from transformers import BertTokenizerFast, BertForMaskedLM
+from transformers import BertTokenizerFast, BertForMaskedLM, BertConfig
 
 from src.taxo_expantion_methods.TaxoPrompt.random_walk import create_extended_taxo_graph
 from src.taxo_expantion_methods.TaxoPrompt.taxo_prompt_dataset_creator import TaxoPromptDsCreator
+from src.taxo_expantion_methods.TaxoPrompt.taxo_prompt_loss import MLMLoss
+from src.taxo_expantion_methods.TaxoPrompt.taxo_prompt_model import TaxoPrompt
 from src.taxo_expantion_methods.TaxoPrompt.trainer import TaxoPromptTrainer
 from src.taxo_expantion_methods.common.wn_dao import WordNetDao
 
@@ -23,14 +25,23 @@ def run(device, epochs, load_path=None):
     print('Train size:', len(X_train))
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
     start = time.time()
-    ds = TaxoPromptDsCreator(tokenizer).prepare_ds(X_train, 6, 5, 6)
+    ds = TaxoPromptDsCreator(tokenizer).prepare_ds(X_train, 6, 5, 32)
     end = time.time()
     print('Created ds in', end - start)
 
     path = 'bert-base-uncased' if load_path is None else load_path
     bert_model = BertForMaskedLM.from_pretrained(path).to(device)
 
-    optimizer = torch.optim.Adam(bert_model.parameters(), lr=1e-5)
+    optimizer = torch.optim.AdamW(bert_model.parameters(), lr=1e-5)
+    config = BertConfig()
+    model = TaxoPrompt(config)
+    loss = MLMLoss(config)
 
-    trainer = TaxoPromptTrainer(tokenizer, bert_model, optimizer, 'data/models/TaxoPrompt/checkpoints')
+    trainer = TaxoPromptTrainer(
+        tokenizer,
+        bert_model,
+        model,
+        loss,
+        optimizer,
+        'data/models/TaxoPrompt/checkpoints')
     trainer.train(ds, device, epochs)

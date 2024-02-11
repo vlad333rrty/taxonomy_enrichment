@@ -8,9 +8,11 @@ from src.taxo_expantion_methods.utils.utils import paginate
 
 
 class TaxoPromptTrainer:
-    def __init__(self, tokenizer: BertTokenizer, bert: BertForMaskedLM, optimizer, checkpoint_save_path):
+    def __init__(self, tokenizer: BertTokenizer, bert: BertForMaskedLM, model, loss, optimizer, checkpoint_save_path):
         self.__tokenizer = tokenizer
         self.__bert = bert
+        self.__model = model
+        self.__loss = loss
         self.__optimizer = optimizer
         self.__checkpoint_save_path = checkpoint_save_path
 
