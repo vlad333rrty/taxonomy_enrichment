@@ -3,13 +3,13 @@ import random
 
 import torch
 from tqdm import tqdm
-from transformers import BertTokenizer, BertForMaskedLM
+from transformers import BertTokenizer, BertForMaskedLM, BertModel
 
 from src.taxo_expantion_methods.utils.utils import paginate
 
 
 class TaxoPromptTrainer:
-    def __init__(self, tokenizer: BertTokenizer, bert: BertForMaskedLM, model, loss, optimizer, checkpoint_save_path):
+    def __init__(self, tokenizer: BertTokenizer, bert: BertModel, model, loss, optimizer, checkpoint_save_path):
         self.__tokenizer = tokenizer
         self.__bert = bert
         self.__model = model
@@ -50,13 +50,14 @@ class TaxoPromptTrainer:
             attention = inputs['attention_mask'].to(device)
             prompts_count = len(prompts)
 
-            output = self.__bert(
-                tokens[:prompts_count],
-                output_hidden_states=True,
-                labels=tokens[prompts_count:],
-                attention_mask=attention[:prompts_count]
-            )
-            loss = output.loss
+            with torch.no_grad():
+                outputs = self.__bert(
+                    tokens[:prompts_count],
+                    output_hidden_states=True,
+                    attention_mask=attention[:prompts_count]
+                )
+            x = self.__model(outputs[0])
+            loss = self.__loss(x, tokens[prompts_count:])
             loss.backward()
             self.__optimizer.step()
 

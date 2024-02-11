@@ -2,7 +2,7 @@ import pickle
 
 import torch
 from sklearn.model_selection import train_test_split
-from transformers import BertTokenizerFast, BertForMaskedLM, BertConfig
+from transformers import BertTokenizerFast, BertForMaskedLM, BertConfig, BertModel
 
 from src.taxo_expantion_methods.TaxoPrompt.taxo_prompt_loss import MLMLoss
 from src.taxo_expantion_methods.TaxoPrompt.taxo_prompt_model import TaxoPrompt
@@ -16,7 +16,7 @@ def run(device, epochs, train_ration, ds_path, load_path=None):
 
     print('Train size:', len(X_train))
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
-    bert_model = BertForMaskedLM.from_pretrained('bert-base-uncased').to(device)
+    bert_model = BertModel.from_pretrained('bert-base-uncased').to(device)
 
     config = BertConfig()
     model = TaxoPrompt(config)
