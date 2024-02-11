@@ -19,8 +19,10 @@ def run(device, epochs, train_ration, ds_path, load_path=None):
 
     print('Train size:', len(X_train))
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
-    path = 'bert-base-uncased' if load_path is None else load_path
-    bert_model = BertForMaskedLM.from_pretrained(path).to(device)
+
+    bert_model = BertForMaskedLM.from_pretrained('bert-base-uncased').to(device)
+    if load_path is not None:
+        bert_model = bert_model.load_state_dict(torch.load(load_path, map_location=torch.device(device)))
 
     optimizer = torch.optim.AdamW(bert_model.parameters(), lr=1e-5)
     config = BertConfig()
