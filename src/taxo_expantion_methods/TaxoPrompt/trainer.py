@@ -43,8 +43,8 @@ class TaxoPromptTrainer:
                 return_tensors='pt',
                 truncation=True
             )
-            tokens = inputs['input_ids']
-            attention = inputs['attention_mask']
+            tokens = inputs['input_ids'].to(device)
+            attention = inputs['attention_mask'].to(device)
             prompts_count = len(prompts)
 
             output = self.__bert(

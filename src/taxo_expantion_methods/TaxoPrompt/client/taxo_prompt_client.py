@@ -28,7 +28,7 @@ def run(device, epochs, load_path=None):
     print('Created ds in', end - start)
 
     path = 'bert-base-uncased' if load_path is None else load_path
-    bert_model = BertForMaskedLM.from_pretrained(path)
+    bert_model = BertForMaskedLM.from_pretrained(path).to(device)
 
     optimizer = torch.optim.Adam(bert_model.parameters(), lr=1e-5)
 
