@@ -1,3 +1,4 @@
+import pickle
 import time
 
 import torch
@@ -11,24 +12,13 @@ from src.taxo_expantion_methods.TaxoPrompt.taxo_prompt_model import TaxoPrompt
 from src.taxo_expantion_methods.TaxoPrompt.trainer import TaxoPromptTrainer
 from src.taxo_expantion_methods.common.wn_dao import WordNetDao
 
-
-def run(device, epochs, batch_size, train_ration, load_path=None):
-    wn_reader = WordNetDao.get_wn_20()
-    root_synset = wn_reader.synset('entity.n.01')
-    taxo_graph = create_extended_taxo_graph(root_synset)
-    train_nodes = list(
-        filter(lambda x: x.get_synset() != root_synset, taxo_graph.values())
-    )
-    X_train, X_test_val = train_test_split(train_nodes, train_size=train_ration, test_size=0.3)
-    X_test, X_val = train_test_split(X_test_val, train_size=0.5, test_size=0.5)
+def run(device, epochs, train_ration, ds_path, load_path=None):
+    with open(ds_path, 'rb')as file:
+        ds = pickle.load(file)
+    X_train, X_test_val = train_test_split(ds, train_size=train_ration, test_size=0.3)
 
     print('Train size:', len(X_train))
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
-    start = time.time()
-    ds = TaxoPromptDsCreator(tokenizer).prepare_ds(X_train, 6, 5, batch_size)
-    end = time.time()
-    print('Created ds in', end - start)
-
     path = 'bert-base-uncased' if load_path is None else load_path
     bert_model = BertForMaskedLM.from_pretrained(path).to(device)
 
@@ -44,4 +34,4 @@ def run(device, epochs, batch_size, train_ration, load_path=None):
         loss,
         optimizer,
         'data/models/TaxoPrompt/checkpoints')
-    trainer.train(ds, device, epochs)
+    trainer.train(X_train, device, epochs)

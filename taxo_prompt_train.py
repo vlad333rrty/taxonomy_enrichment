@@ -1,5 +1,5 @@
 from src.taxo_expantion_methods.TaxoPrompt.client.taxo_prompt_client import run
 
-device = 'cuda:0'
+device = 'cpu'
 epochs=10
-run(device, epochs, 6, 0.7)
+run(device, epochs, 0.7, 'data/datasets/taxo-prompt/nouns/ds')
