@@ -4,7 +4,7 @@ import os
 import torch
 from tqdm import tqdm
 
-from src.taxo_expantion_methods.TEMP.plot_monitor import PlotMonitor, Metric
+from src.taxo_expantion_methods.common.plot_monitor import PlotMonitor, Metric
 from src.taxo_expantion_methods.TEMP.temp_embeddings_provider import TEMPEmbeddingProvider
 
 

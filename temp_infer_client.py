@@ -67,6 +67,6 @@ def run(terms_batch):
     print('Got result for {} terms'.format(len(terms_batch)))
 
 
-pool = ThreadPool(2)
+pool = ThreadPool(1)
 batches = paginate(res_terms, 2)
 pool.map(run, batches)
