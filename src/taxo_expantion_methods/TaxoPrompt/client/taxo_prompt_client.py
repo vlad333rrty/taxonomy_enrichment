@@ -19,11 +19,11 @@ def run(device, epochs, train_ration, ds_path, load_path=None):
     bert_model = BertModel.from_pretrained('bert-base-uncased').to(device)
 
     config = BertConfig()
-    model = TaxoPrompt(config)
+    model = TaxoPrompt(config).to(device)
     if load_path is not None:
         model.load_state_dict(torch.load(load_path, map_location=torch.device(device)))
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-5)
-    loss = MLMLoss(config)
+    loss = MLMLoss(config).to(device)
 
     trainer = TaxoPromptTrainer(
         tokenizer,
