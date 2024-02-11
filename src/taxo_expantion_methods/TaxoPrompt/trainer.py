@@ -4,6 +4,8 @@ import torch
 from tqdm import tqdm
 from transformers import BertTokenizer, BertForMaskedLM
 
+from src.taxo_expantion_methods.utils.utils import paginate
+
 
 class TaxoPromptTrainer:
     def __init__(self, tokenizer: BertTokenizer, bert: BertForMaskedLM, optimizer, checkpoint_save_path):
@@ -25,8 +27,6 @@ class TaxoPromptTrainer:
             add_special_tokens=True
         )
         return inputs['input_ids'].to(device), inputs['attention_mask'].to(device)
-
-
 
     def __train_epoch(self, train_data, device, epoch):
         for i, batch in (pbar := tqdm(enumerate(train_data))):
@@ -57,12 +57,15 @@ class TaxoPromptTrainer:
             loss.backward()
             self.__optimizer.step()
 
-            if i % 100 == 0:
+            if i % 50 == 0:
                 print(loss.item())
+            if i % 1000:
+                self.__save_checkpoint(epoch)
 
             # train_progess_monitor.step(model, epoch, batch_num, len(train_loader), loss, loss_fn)
 
     def train(self, train_data, device, epochs):
+        ds_batches = paginate(train_data, epochs)
         for epoch in range(epochs):
-            self.__train_epoch(train_data, device, epoch)
+            self.__train_epoch(ds_batches[epoch], device, epoch)
             self.__save_checkpoint(epoch)
