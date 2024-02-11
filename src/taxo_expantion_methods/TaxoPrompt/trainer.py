@@ -19,7 +19,7 @@ class TaxoPromptTrainer:
 
     def __save_checkpoint(self, epoch):
         save_path = os.path.join(self.__checkpoint_save_path, 'taxo_prompt_model_epoch_{}'.format(epoch))
-        torch.save(self.__bert.state_dict(), save_path)
+        torch.save(self.__model.state_dict(), save_path)
 
     def __tokenize(self, sentences, device):
         inputs = self.__tokenizer.batch_encode_plus(

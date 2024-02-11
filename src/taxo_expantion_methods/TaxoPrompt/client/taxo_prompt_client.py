@@ -1,16 +1,13 @@
 import pickle
-import time
 
 import torch
 from sklearn.model_selection import train_test_split
 from transformers import BertTokenizerFast, BertForMaskedLM, BertConfig
 
-from src.taxo_expantion_methods.TaxoPrompt.random_walk import create_extended_taxo_graph
-from src.taxo_expantion_methods.TaxoPrompt.taxo_prompt_dataset_creator import TaxoPromptDsCreator
 from src.taxo_expantion_methods.TaxoPrompt.taxo_prompt_loss import MLMLoss
 from src.taxo_expantion_methods.TaxoPrompt.taxo_prompt_model import TaxoPrompt
 from src.taxo_expantion_methods.TaxoPrompt.trainer import TaxoPromptTrainer
-from src.taxo_expantion_methods.common.wn_dao import WordNetDao
+
 
 def run(device, epochs, train_ration, ds_path, load_path=None):
     with open(ds_path, 'rb')as file:
@@ -19,14 +16,13 @@ def run(device, epochs, train_ration, ds_path, load_path=None):
 
     print('Train size:', len(X_train))
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
-
     bert_model = BertForMaskedLM.from_pretrained('bert-base-uncased').to(device)
-    if load_path is not None:
-        bert_model = bert_model.load_state_dict(torch.load(load_path, map_location=torch.device(device)))
 
-    optimizer = torch.optim.AdamW(bert_model.parameters(), lr=1e-5)
     config = BertConfig()
     model = TaxoPrompt(config)
+    if load_path is not None:
+        model.load_state_dict(torch.load(load_path, map_location=torch.device(device)))
+    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-5)
     loss = MLMLoss(config)
 
     trainer = TaxoPromptTrainer(
