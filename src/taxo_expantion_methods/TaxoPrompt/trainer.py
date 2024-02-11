@@ -67,7 +67,7 @@ class TaxoPromptTrainer:
             # train_progess_monitor.step(model, epoch, batch_num, len(train_loader), loss, loss_fn)
 
     def train(self, train_data, device, epochs):
-        ds_batches = paginate(train_data, epochs)
+        ds_batches = paginate(train_data, len(train_data) / 8)
         for epoch in range(epochs):
             self.__train_epoch(ds_batches[epoch], device, epoch)
             self.__save_checkpoint(epoch)
