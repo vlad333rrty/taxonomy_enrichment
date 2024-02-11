@@ -12,14 +12,14 @@ from src.taxo_expantion_methods.TaxoPrompt.trainer import TaxoPromptTrainer
 from src.taxo_expantion_methods.common.wn_dao import WordNetDao
 
 
-def run(device, epochs, batch_size, load_path=None):
+def run(device, epochs, batch_size, train_ration, load_path=None):
     wn_reader = WordNetDao.get_wn_20()
     root_synset = wn_reader.synset('entity.n.01')
     taxo_graph = create_extended_taxo_graph(root_synset)
     train_nodes = list(
         filter(lambda x: x.get_synset() != root_synset, taxo_graph.values())
     )
-    X_train, X_test_val = train_test_split(train_nodes, train_size=0.6, test_size=0.3)
+    X_train, X_test_val = train_test_split(train_nodes, train_size=train_ration, test_size=0.3)
     X_test, X_val = train_test_split(X_test_val, train_size=0.5, test_size=0.5)
 
     print('Train size:', len(X_train))
