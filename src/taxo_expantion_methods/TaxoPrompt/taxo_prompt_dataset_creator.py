@@ -70,42 +70,34 @@ class TaxoPromptDsCreator:
     #         j += 1
     #     return ids
 
-    def __mask_ratio_tokens(self, seq, ratio):
-        base_t = self.__tokenizer.encode_plus(
-            seq,
-            padding=True,
-            return_tensors='pt',
-            add_special_tokens=False
-        )['input_ids']
-        slice = base_t[0]
-        taken = set()
-        while len(taken) / len(slice) < ratio:
-            n = random.randint(0, len(slice) - 1)
-            while n in taken:
-                n = random.randint(0, len(slice) - 1)
-            taken.add(n)
-            slice[n] = self.__tokenizer.mask_token_id
-        return self.__tokenizer.decode(slice)
-
     def __taxo_prompt_to_str(self, taxo_prompt):
         sep = '[SEP]'
-        base_str = f'What is {Relation.PARENT_OF} {get_synset_simple_name(taxo_prompt.concept)}? it is {get_synset_simple_name(taxo_prompt.parent)}'
-        bas_str_mask = f'What is {Relation.PARENT_OF} {get_synset_simple_name(taxo_prompt.concept)}? it is [MASK]'
+        base_str = f'What is {Relation.PARENT_OF.value} {get_synset_simple_name(taxo_prompt.concept)}? it is {get_synset_simple_name(taxo_prompt.parent)}'
+        bas_str_mask = f'What is {Relation.PARENT_OF.value} {get_synset_simple_name(taxo_prompt.concept)}? it is [MASK]'
 
-        masked_context = self.__mask_ratio_tokens(taxo_prompt.taxonomic_context, 0.15)
-        masked_def = self.__mask_ratio_tokens(taxo_prompt.concept.definition(), 0.15)
-        p1 = f'{bas_str_mask}{sep}{masked_def}'
-        p2 = f'{bas_str_mask}{sep}{masked_context}'
+        pdef = taxo_prompt.parent.definition()
+        ids = self.__tokenizer.encode_plus(
+            pdef,
+            padding=True,
+            truncation=True,
+            add_special_tokens=False
+        )['input_ids']
+
+
+        p1 = f'{bas_str_mask}{sep}{taxo_prompt.concept.definition()}'
+        p2 = f'{bas_str_mask}{sep}{taxo_prompt.taxonomic_context}'
+        p_res = ' '.join([p1, '[MASK]' * len(ids), p2])
         e1 = f'{base_str}{sep}{taxo_prompt.concept.definition()}'
         e2 = f'{base_str}{sep}{taxo_prompt.taxonomic_context}'
-        return p1, e1, p2, e2
+        e_res = ' '.join([e1, pdef, e2])
+        return p_res, e_res
 
     def prepare_ds(self, train_nodes, relations_limit, tau, batch_size=8):
         samples = []
         for node in tqdm(train_nodes):
             taxo_prompt = self.__build_taxo_prompt(node, relations_limit, tau)
-            p1, e1, p2, e2 = self.__taxo_prompt_to_str(taxo_prompt)
-            samples.append((p1, e1, p2, e2))
+            p, e = self.__taxo_prompt_to_str(taxo_prompt)
+            samples.append((p, e))
 
         pointer = 0
         batches = []
@@ -116,10 +108,8 @@ class TaxoPromptDsCreator:
             while pointer < len(samples) and i < batch_size:
                 prompts.append(samples[pointer][0])
                 pdefs.append(samples[pointer][1])
-                prompts.append(samples[pointer][2])
-                pdefs.append(samples[pointer][3])
                 pointer += 1
-                i += 2
+                i += 1
             batches.append(TaxoPromptBatch(prompts, pdefs))
 
         return batches
