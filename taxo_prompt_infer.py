@@ -4,7 +4,6 @@ from multiprocessing.pool import ThreadPool
 import torch
 from transformers import BertConfig
 
-from src.taxo_expantion_methods.TEMP.synsets_provider import SynsetsProvider
 from src.taxo_expantion_methods.TaxoPrompt.client.taxo_prompt_infer import TaxoPromptTermInferencePerformerFactory
 from src.taxo_expantion_methods.TaxoPrompt.taxo_prompt_model import TaxoPrompt
 from src.taxo_expantion_methods.common import performance
@@ -14,13 +13,12 @@ from src.taxo_expantion_methods.utils.utils import paginate
 
 device = 'cpu'
 terms_path = 'data/datasets/diachronic-wordnets/en/no_labels_nouns_en.2.0-3.0.tsv'
-load_path = 'data/models/TaxoPrompt/pre-trained/taxo_prompt_model_epoch_10'
+load_path = 'data/models/TaxoPrompt/pre-trained/taxo_prompt_model'
 result_path = 'data/results/TaxoPrompt/predicted.tsv'
-limit = 10
+limit = 1
 
 model = TaxoPrompt(BertConfig()).to(device)
-model.load_state_dict(
-    torch.load('data/models/TaxoPrompt/pre-trained/taxo_prompt_model_epoch_15', map_location=torch.device(device)))
+model.load_state_dict(torch.load(load_path, map_location=torch.device(device)))
 
 
 def read_terms(path, _limit):
@@ -67,5 +65,5 @@ def run(terms_batch):
 
 
 pool = ThreadPool(1)
-batches = paginate(res_terms, 2)
+batches = paginate(res_terms, 1)
 pool.map(run, batches)

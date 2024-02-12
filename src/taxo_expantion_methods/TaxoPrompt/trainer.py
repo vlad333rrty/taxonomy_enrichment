@@ -61,14 +61,13 @@ class TaxoPromptTrainer:
             loss.backward()
             self.__optimizer.step()
 
-            if i % 50 == 0:
+            if i % 100 == 0:
                 print(loss.item())
-            if i % 1000:
-                self.__save_checkpoint(epoch)
 
             # train_progess_monitor.step(model, epoch, batch_num, len(train_loader), loss, loss_fn)
 
     def train(self, train_data, device, epochs):
+        pages = paginate(train_data, len(train_data) // epochs)
         for epoch in range(epochs):
-            self.__train_epoch(random.sample(train_data, len(train_data) // epochs), device, epoch)
+            self.__train_epoch(pages[epoch], device, epoch)
             self.__save_checkpoint(epoch)
