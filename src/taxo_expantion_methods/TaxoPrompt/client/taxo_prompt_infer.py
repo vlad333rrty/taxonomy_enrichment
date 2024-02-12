@@ -102,4 +102,4 @@ def infer(device, concepts, definitions, all_synsets):
     model.load_state_dict(
         torch.load('data/models/TaxoPrompt/pre-trained/taxo_prompt_model_epoch_15', map_location=torch.device(device)))
 
-    return inferer.infer(model, concepts, definitions, all_synsets)
+    return inferer.infer(model, concepts, definitions, all_synsets, device)
