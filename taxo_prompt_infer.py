@@ -19,7 +19,7 @@ limit = 1
 
 model = TaxoPrompt(BertConfig()).to(device)
 model.load_state_dict(torch.load(load_path, map_location=torch.device(device)))
-
+model.eval()
 
 def read_terms(path, _limit):
     with open(path, 'r') as _file:
@@ -63,7 +63,7 @@ def run(terms_batch):
     file_write_lock.release()
     print('Got result for {} terms'.format(len(terms_batch)))
 
-
-pool = ThreadPool(1)
-batches = paginate(res_terms, 1)
-pool.map(run, batches)
+with torch.no_grad():
+    pool = ThreadPool(1)
+    batches = paginate(res_terms, 1)
+    pool.map(run, batches)

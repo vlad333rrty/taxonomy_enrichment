@@ -4,10 +4,27 @@ from tqdm import tqdm
 from transformers import BertForMaskedLM, BertTokenizer, BertTokenizerFast, BertModel, BertConfig
 
 from src.taxo_expantion_methods.TEMP.synsets_provider import SynsetsProvider, create_synsets_batch
-from src.taxo_expantion_methods.TaxoPrompt.taxo_prompt_dataset_creator import TaxoPromtBuilder
 from src.taxo_expantion_methods.TaxoPrompt.taxo_prompt_model import TaxoPrompt
 from src.taxo_expantion_methods.common.wn_dao import WordNetDao
 from src.taxo_expantion_methods.utils.utils import get_synset_simple_name
+
+class TaxoPromtBuilder:
+    """
+    TODO REMOVE
+    """
+    def __init__(self):
+        self.__buffer = []
+
+    def add(self, value):
+        self.__buffer.append(value)
+        return self
+
+    def set(self, index, value):
+        self.__buffer[index] = value
+
+    def __str__(self):
+        return ' '.join(self.__buffer)
+
 
 
 class Inferer:

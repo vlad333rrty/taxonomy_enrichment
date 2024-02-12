@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class Relation(Enum):
-    PARENT_OF = 'parent-of'
-    CHILD_OF = 'child-of'
-    SIBLING_OF = 'sibling-of'
-    NEPHEW_OF = 'nephew-of'
+    PARENT_OF = 'parentOf'
+    CHILD_OF = 'childOf'
+    SIBLING_OF = 'siblingOf'
+    NEPHEW_OF = 'nephewOf'

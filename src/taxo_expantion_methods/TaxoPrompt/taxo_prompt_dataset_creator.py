@@ -6,6 +6,7 @@ from tqdm import tqdm
 from transformers import BertTokenizer
 
 from src.taxo_expantion_methods.TaxoPrompt.random_walk import ExtendedTaxoGraphNode
+from src.taxo_expantion_methods.TaxoPrompt.terms_relation import Relation
 from src.taxo_expantion_methods.utils.utils import get_synset_simple_name, paginate
 
 
@@ -22,20 +23,6 @@ class TaxoPromptBatch:
         self.pdefs = pdefs
 
 
-class TaxoPromtBuilder:
-    def __init__(self):
-        self.__buffer = []
-
-    def add(self, value):
-        self.__buffer.append(value)
-        return self
-
-    def set(self, index, value):
-        self.__buffer[index] = value
-
-    def __str__(self):
-        return ' '.join(self.__buffer)
-
 
 class TaxoPromptDsCreator:
     def __init__(self, tokenizer: BertTokenizer):
@@ -45,7 +32,7 @@ class TaxoPromptDsCreator:
         stack = [concept_node]
         used = set()
         used.add(concept_node)
-        buffer = [concept_node.get_synset().name()]
+        buffer = [get_synset_simple_name(concept_node.get_synset())]
         while len(stack) > 0 and len(used) < limit:
             node = stack.pop()
             not_visited = list(filter(lambda x: x[1] not in used, node.get_edges()))
@@ -53,7 +40,7 @@ class TaxoPromptDsCreator:
                 break
             random_edge = random.choice(not_visited)
             buffer.append(random_edge[0].value)
-            buffer.append(random_edge[1].get_synset().name())
+            buffer.append(get_synset_simple_name(random_edge[1].get_synset()))
             stack.append(random_edge[1])
             used.add(node)
 
@@ -72,39 +59,43 @@ class TaxoPromptDsCreator:
         return _TaxoPrompt(concept, random_parent, taxonomic_context)
 
 
-    def set_mask(self, ids):
-        it_t, is_t = self.__tokenizer.vocab['it'], self.__tokenizer.vocab['is']
-        for i in range(len(ids)):
-            if ids[i] == it_t and ids[i + 1] == is_t:
-                break
-        j = i + 2
-        while j < len(ids):
-            ids[j] = self.__tokenizer.mask_token_id
-            j += 1
-        return ids
+    # def set_mask(self, ids):
+    #     it_t, is_t = self.__tokenizer.vocab['it'], self.__tokenizer.vocab['is']
+    #     for i in range(len(ids)):
+    #         if ids[i] == it_t and ids[i + 1] == is_t:
+    #             break
+    #     j = i + 2
+    #     while j < len(ids):
+    #         ids[j] = self.__tokenizer.mask_token_id
+    #         j += 1
+    #     return ids
 
-    def __taxo_prompt_to_str(self, taxo_prompt):
-        sep = '[SEP]'
-        pdef = taxo_prompt.parent.definition()
-        builder = TaxoPromtBuilder()
-        (builder.add('what is parent-of')
-         .add(get_synset_simple_name(taxo_prompt.concept))
-         .add('?')
-         .add('it is')
-         .add(get_synset_simple_name(taxo_prompt.parent))
-         .add(pdef)
-         )
-        base_str = builder.__str__()
+    def __mask_ratio_tokens(self, seq, ratio):
         base_t = self.__tokenizer.encode_plus(
-            base_str,
+            seq,
             padding=True,
             return_tensors='pt',
             add_special_tokens=False
         )['input_ids']
-        masked_ids = self.set_mask(base_t.clone()[0])
-        masked_str = self.__tokenizer.decode(masked_ids)
-        p1 = f'{masked_str}{sep}{taxo_prompt.concept.definition()}'
-        p2 = f'{masked_str}{sep}{taxo_prompt.taxonomic_context}'
+        slice = base_t[0]
+        taken = set()
+        while len(taken) / len(slice) < ratio:
+            n = random.randint(0, len(slice) - 1)
+            while n in taken:
+                n = random.randint(0, len(slice) - 1)
+            taken.add(n)
+            slice[n] = self.__tokenizer.mask_token_id
+        return self.__tokenizer.decode(slice)
+
+    def __taxo_prompt_to_str(self, taxo_prompt):
+        sep = '[SEP]'
+        base_str = f'What is {Relation.PARENT_OF} {get_synset_simple_name(taxo_prompt.concept)}? it is {get_synset_simple_name(taxo_prompt.parent)}'
+        bas_str_mask = f'What is {Relation.PARENT_OF} {get_synset_simple_name(taxo_prompt.concept)}? it is [MASK]'
+
+        masked_context = self.__mask_ratio_tokens(taxo_prompt.taxonomic_context, 0.15)
+        masked_def = self.__mask_ratio_tokens(taxo_prompt.concept.definition(), 0.15)
+        p1 = f'{bas_str_mask}{sep}{masked_def}'
+        p2 = f'{bas_str_mask}{sep}{masked_context}'
         e1 = f'{base_str}{sep}{taxo_prompt.concept.definition()}'
         e2 = f'{base_str}{sep}{taxo_prompt.taxonomic_context}'
         return p1, e1, p2, e2
