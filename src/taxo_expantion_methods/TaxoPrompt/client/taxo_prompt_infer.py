@@ -69,13 +69,13 @@ class Inferer:
             res += ks[token]
         return res / len(tokens[0])
 
-    def infer(self, model, concepts, definitions, all_synsets):
+    def infer(self, model, concepts, definitions, all_synsets, device):
         scores = {}
         for anchor in tqdm(all_synsets):
             prompts, indices = self.__taxo_prompt_to_str(concepts, definitions, anchor)
             with torch.no_grad():
                 outputs = self.__bert(
-                    prompts,
+                    prompts.to(device),
                     output_hidden_states=True
                 )
             output = model(outputs[0])
