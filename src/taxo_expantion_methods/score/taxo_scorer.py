@@ -87,7 +87,7 @@ class TaxoScorer:
         :return: (recall, wup)
         """
         etalon_term2parent = TaxoScorer.__parse_input(golden_path)
-        predicted_term2parent = TaxoScorer.__parse_input(predicted_path, ' ')
+        predicted_term2parent = TaxoScorer.__parse_input(predicted_path)
         coverage = 0
         wup = 0
         accuracy = 0
@@ -105,9 +105,7 @@ class TaxoScorer:
             p_set = set(predicted)
             e_set = set(expected)
             true_answs = p_set.intersection(e_set)
-            if len(true_answs) > 0:
-                acc = 1
-            accuracy += acc
+            accuracy += len(true_answs)
             prec_i += len(true_answs) / len(p_set)
 
         return coverage / len(etalon_term2parent), wup / coverage, accuracy / coverage, prec_i / len(predicted_term2parent)
@@ -116,7 +114,7 @@ class TaxoScorer:
 def run_scorer():
     wn_reader = WordNetDao.get_wn_30()
     scorer = TaxoScorer(wn_reader)
-    results = scorer.score_taxo_results('data/results/TEMP/golden.tsv', 'data/results/TEMP/predicted.tsv')
+    results = scorer.score_taxo_results('data/results/taxo_expan/golden.tsv', 'data/results/taxo_expan/predicted.tsv')
     print(results)
 
 
