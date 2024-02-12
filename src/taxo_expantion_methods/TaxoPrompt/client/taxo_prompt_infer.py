@@ -3,7 +3,7 @@ from nltk.corpus import WordNetCorpusReader
 from tqdm import tqdm
 from transformers import BertForMaskedLM, BertTokenizer, BertTokenizerFast, BertModel, BertConfig
 
-from src.taxo_expantion_methods.TEMP.synsets_provider import SynsetsProvider
+from src.taxo_expantion_methods.TEMP.synsets_provider import SynsetsProvider, create_synsets_batch
 from src.taxo_expantion_methods.TaxoPrompt.taxo_prompt_dataset_creator import TaxoPromtBuilder
 from src.taxo_expantion_methods.TaxoPrompt.taxo_prompt_model import TaxoPrompt
 from src.taxo_expantion_methods.common.wn_dao import WordNetDao
@@ -11,9 +11,10 @@ from src.taxo_expantion_methods.utils.utils import get_synset_simple_name
 
 
 class Inferer:
-    def __init__(self, tokenizer: BertTokenizer, bert: BertModel):
+    def __init__(self, tokenizer: BertTokenizer, bert: BertModel, all_synsets):
         self.__tokenizer = tokenizer
         self.__bert = bert
+        self.__all_synsets = all_synsets
 
     def set_mask(self, ids):
         it_t, is_t = self.__tokenizer.vocab['it'], self.__tokenizer.vocab['is']
@@ -69,9 +70,9 @@ class Inferer:
             res += ks[token]
         return res / len(tokens[0])
 
-    def infer(self, model, concepts, definitions, all_synsets, device):
+    def infer(self, model, concepts, definitions, device):
         scores = {}
-        for anchor in tqdm(all_synsets):
+        for anchor in tqdm(self.__all_synsets):
             prompts, indices = self.__taxo_prompt_to_str(concepts, definitions, anchor)
             with torch.no_grad():
                 outputs = self.__bert(
@@ -90,16 +91,12 @@ class Inferer:
                 i += 1
         return scores
 
-
-
-
-def infer(device, concepts, definitions, all_synsets):
-    tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
-    bert_model = BertModel.from_pretrained('bert-base-uncased').to(device)
-    inferer = Inferer(tokenizer, bert_model)
-
-    model = TaxoPrompt(BertConfig()).to(device)
-    model.load_state_dict(
-        torch.load('data/models/TaxoPrompt/pre-trained/taxo_prompt_model_epoch_15', map_location=torch.device(device)))
-
-    return inferer.infer(model, concepts, definitions, all_synsets, device)
+class TaxoPromptTermInferencePerformerFactory:
+    @staticmethod
+    def create(device, batch_size):
+        wn_reader = WordNetDao.get_wn_20()
+        all_synsets = SynsetsProvider.get_all_synsets_with_common_root(wn_reader.synset('entity.n.01'))
+        synsets_batches = create_synsets_batch(all_synsets, batch_size)
+        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        bert_model = BertModel.from_pretrained('bert-base-uncased').to(device)
+        return Inferer(tokenizer, bert_model, all_synsets)
