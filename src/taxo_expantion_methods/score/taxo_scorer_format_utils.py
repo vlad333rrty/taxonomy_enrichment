@@ -61,6 +61,6 @@ def format_diachronic_ds(path, dump_path):
 
 def run_formatting():
     format_diachronic_ds('data/datasets_processing/diachronic-wordnets/en/nouns_en.2.0-3.0.tsv', 'score/golden.tsv')
-    format_taxo_result('score/taxo_result_full_learn.tsv', 'score/predicted_on_full_learn.tsv')
+    format_taxo_result('score/taxo_result_full_learn.tsv', 'score/predicted.tsv')
 
 run_formatting()

@@ -90,6 +90,8 @@ class TaxoScorer:
         predicted_term2parent = TaxoScorer.__parse_input(predicted_path, ' ')
         coverage = 0
         wup = 0
+        accuracy = 0
+        prec_i = 0
         for term in etalon_term2parent:
             print('Processing term', term)
             if term not in predicted_term2parent:
@@ -99,8 +101,16 @@ class TaxoScorer:
             expected = etalon_term2parent[term]
             predicted = predicted_term2parent[term]
             wup += self.__get_best_wup(expected, predicted)
+            acc = 0
+            p_set = set(predicted)
+            e_set = set(expected)
+            true_answs = p_set.intersection(e_set)
+            if len(true_answs) > 0:
+                acc = 1
+            accuracy += acc
+            prec_i += len(true_answs) / len(p_set)
 
-        return coverage / len(etalon_term2parent), wup / coverage
+        return coverage / len(etalon_term2parent), wup / coverage, accuracy / coverage, prec_i / len(predicted_term2parent)
 
 
 def run_scorer():

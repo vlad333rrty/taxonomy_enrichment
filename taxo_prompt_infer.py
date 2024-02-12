@@ -14,7 +14,7 @@ from src.taxo_expantion_methods.utils.utils import paginate
 
 device = 'cpu'
 terms_path = 'data/datasets/diachronic-wordnets/en/no_labels_nouns_en.2.0-3.0.tsv'
-load_path = 'data/models/TaxoPrompt/pre-trained/taxo_prompt_model_epoch_15'
+load_path = 'data/models/TaxoPrompt/pre-trained/taxo_prompt_model_epoch_10'
 result_path = 'data/results/TaxoPrompt/predicted.tsv'
 limit = 10
 
