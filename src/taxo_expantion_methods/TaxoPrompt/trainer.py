@@ -61,7 +61,7 @@ class TaxoPromptTrainer:
             loss.backward()
             self.__optimizer.step()
 
-            if i % 100 == 0:
+            if i % 500 == 0 or batch_num == len(train_data):
                 print(loss.item())
 
             # train_progess_monitor.step(model, epoch, batch_num, len(train_loader), loss, loss_fn)
