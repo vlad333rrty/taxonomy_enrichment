@@ -12,7 +12,7 @@ from src.taxo_expantion_methods.TaxoPrompt.trainer import TaxoPromptTrainer
 def run(device, epochs, train_ration, ds_path, load_path=None):
     with open(ds_path, 'rb')as file:
         ds = pickle.load(file)
-    X_train, X_test_val = train_test_split(ds, train_size=train_ration, test_size=0.3)
+    X_train, X_test_val = train_test_split(ds, train_size=train_ration)
 
     print('Train size:', len(X_train))
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
