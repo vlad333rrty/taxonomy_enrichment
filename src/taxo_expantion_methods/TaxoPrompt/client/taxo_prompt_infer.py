@@ -1,30 +1,10 @@
 import torch
-from nltk.corpus import WordNetCorpusReader
 from tqdm import tqdm
-from transformers import BertForMaskedLM, BertTokenizer, BertTokenizerFast, BertModel, BertConfig
+from transformers import BertTokenizer, BertModel
 
 from src.taxo_expantion_methods.TEMP.synsets_provider import SynsetsProvider, create_synsets_batch
-from src.taxo_expantion_methods.TaxoPrompt.taxo_prompt_model import TaxoPrompt
+from src.taxo_expantion_methods.TaxoPrompt.terms_relation import Relation
 from src.taxo_expantion_methods.common.wn_dao import WordNetDao
-from src.taxo_expantion_methods.utils.utils import get_synset_simple_name
-
-class TaxoPromtBuilder:
-    """
-    TODO REMOVE
-    """
-    def __init__(self):
-        self.__buffer = []
-
-    def add(self, value):
-        self.__buffer.append(value)
-        return self
-
-    def set(self, index, value):
-        self.__buffer[index] = value
-
-    def __str__(self):
-        return ' '.join(self.__buffer)
-
 
 
 class Inferer:
@@ -50,56 +30,47 @@ class Inferer:
         pdef = parent.definition()
         xs = []
         for i in range(len(concepts)):
-            builder = TaxoPromtBuilder()
-            (builder.add('what is parent-of')
-             .add(concepts[i])
-             .add('?')
-             .add('it is')
-             .add(get_synset_simple_name(parent))
-             .add(pdef)
-             .add(sep)
-             .add(definitions[i])
-             )
-            xs.append(builder.__str__())
+            pr = f'What is {Relation.PARENT_OF.value} {concepts[i]}? it is [MASK]'
+            descr = definitions[i]
+            pr_res = f'{pr}[SEP]{descr}'
+            xs.append(' '.join([pr_res, '[MASK]' * len(pdef)]))
 
         base_t = self.__tokenizer.batch_encode_plus(
             xs,
             padding=True,
             return_tensors='pt',
-            add_special_tokens=False
         )['input_ids']
-        indices = []
-        for elem in base_t:
-            x = self.set_mask(elem)
-            indices.append(x)
-        return base_t, indices
+        return base_t
 
-    def score(self, output, definition, start_end):
+    def score(self, output, tokens, prompt):
+        for i in range(len(prompt) - 2, 0, -1):
+            if prompt[i] != self.__tokenizer.mask_token_id:
+                break
+        i = i + 1
         res = 0
-        ks = output[start_end[0]]
-        tokens = self.__tokenizer.encode_plus(
-            definition,
-            padding=True,
-            return_tensors='pt',
-            add_special_tokens=False
-        )['input_ids']
-        for token in tokens[0]:
-            res += ks[token]
-        return res / len(tokens[0])
+        for j in range(len(tokens)):
+            res += output[i][tokens[j]]
+        return res / len(tokens)
 
     def infer(self, model, concepts, definitions, device):
         scores = {}
         for anchor in tqdm(self.__all_synsets):
-            prompts, indices = self.__taxo_prompt_to_str(concepts, definitions, anchor)
             with torch.no_grad():
+                tokens = self.__tokenizer.encode_plus(
+                    anchor.definition(),
+                    padding=True,
+                    truncation=True,
+                    add_special_tokens=False
+                )['input_ids']
+                prompts = self.__taxo_prompt_to_str(concepts, definitions, anchor)
                 outputs = self.__bert(
                     prompts.to(device),
                     output_hidden_states=True
                 )
-            output = model(outputs[0])
+                output = model(outputs[0])
             i = 0
             for elem in output:
-                score = self.score(elem, anchor.definition(), indices[i])
+                score = self.score(elem, tokens, prompts[i])
                 concept = concepts[i]
                 if concept not in scores:
                     scores[concept] = (score, anchor)
@@ -107,6 +78,7 @@ class Inferer:
                     scores[concept] = (score, anchor)
                 i += 1
         return scores
+
 
 class TaxoPromptTermInferencePerformerFactory:
     @staticmethod

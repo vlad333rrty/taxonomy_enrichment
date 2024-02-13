@@ -13,7 +13,7 @@ from src.taxo_expantion_methods.utils.utils import paginate
 
 device = 'cpu'
 terms_path = 'data/datasets/diachronic-wordnets/en/no_labels_nouns_en.2.0-3.0.tsv'
-load_path = 'data/models/TaxoPrompt/pre-trained/taxo_prompt_model'
+load_path = 'data/models/TaxoPrompt/pre-trained/taxo_prompt_model_epoch_5'
 result_path = 'data/results/TaxoPrompt/predicted.tsv'
 limit = 1
 
@@ -64,6 +64,6 @@ def run(terms_batch):
     print('Got result for {} terms'.format(len(terms_batch)))
 
 with torch.no_grad():
-    pool = ThreadPool(1)
     batches = paginate(res_terms, 1)
-    pool.map(run, batches)
+    for batch in batches:
+        run(batch)
