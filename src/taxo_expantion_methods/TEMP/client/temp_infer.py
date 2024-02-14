@@ -53,7 +53,7 @@ class TEMPTermInferencePerformer:
             else:
                 min = 2
                 for j in range(len(item)):
-                    if min > item[j][0]:
+                    if item[j][0] < score and min > item[j][0]:
                         r = j
                         min = item[j][0]
                 item[r] = (score, candidate_path)
