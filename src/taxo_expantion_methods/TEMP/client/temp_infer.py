@@ -24,9 +24,10 @@ class _TermSynsetAdapter:
 
 
 class TEMPTermInferencePerformer:
-    def __init__(self, synsets_batch_provider, embedding_provider: TEMPEmbeddingProvider):
+    def __init__(self, synsets_batch_provider, embedding_provider: TEMPEmbeddingProvider, k=5):
         self.__synsets_batch_provider = synsets_batch_provider
         self.__embedding_provider = embedding_provider
+        self.__k = k
 
     def infer(self, model: TEMP, terms_batch: [Term]):
         term_sysnet_adapters = list(map(lambda term: _TermSynsetAdapter(term), terms_batch))
@@ -47,8 +48,17 @@ class TEMPTermInferencePerformer:
             score = scores[offset + i]
             if item is None:
                 result_buffer[i] = [(score, candidate_path)]
-            elif item[0] < score:
-                result_buffer[i].append((score, candidate_path))
+            elif len(item) < self.__k:
+                item.append((score, candidate_path))
+            else:
+                min = 2
+                for j in range(len(item)):
+                    if min > item[j][0]:
+                        r = j
+                        min = item[j][0]
+                item[r] = (score, candidate_path)
+
+
 
     def __get_candidates_paths(self, taxonomy_paths, terms):
         candidate_paths = []

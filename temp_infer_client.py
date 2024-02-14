@@ -71,6 +71,8 @@ def run(terms_batch):
     print('Got result for {} terms'.format(len(terms_batch)))
 
 
-pool = ThreadPool(1)
-batches = paginate(res_terms, 2)
-pool.map(run, batches)
+
+with torch.no_grad():
+  batches = paginate(res_terms, 8)
+  for batch in batches:
+    run(batch)
