@@ -44,10 +44,14 @@ def format_result(_terms, results):
     for i in range(len(_terms)):
         result = results[i]
         term = _terms[i]
-        if len(result) > 2:
-            res_str += '{} {},{}\n'.format(term.value, result[-1].name(), result[-2].name())
-        else:
-            res_str += '{} {}\n'.format(term.value, result[-1].name())
+        anchors = []
+        for r in result:
+            path = r[1]
+            anchors.append(path[-1])
+            if len(r) > 2:
+                anchors.append(path[-2])
+
+        res_str += '{}\t{}'.format(term.value, ','.join(anchors))
     return res_str
 
 

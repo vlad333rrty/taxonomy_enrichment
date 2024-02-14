@@ -48,7 +48,7 @@ class TaxoScorer:
         term2parent = {}
         for pair in terms_and_parents:
             term = pair[0]
-            parents = pair[1].split(',')
+            parents = pair[1].strip().split(',')
             if term in term2parent:
                 term2parent[term] += parents
             else:
@@ -87,11 +87,12 @@ class TaxoScorer:
         :return: (recall, wup)
         """
         etalon_term2parent = TaxoScorer.__parse_input(golden_path)
-        predicted_term2parent = TaxoScorer.__parse_input(predicted_path)
+        predicted_term2parent = TaxoScorer.__parse_input(predicted_path, '\t')
         coverage = 0
         wup = 0
         accuracy = 0
         prec_i = 0
+        a, b = [], []
         for term in etalon_term2parent:
             print('Processing term', term)
             if term not in predicted_term2parent:
@@ -107,6 +108,12 @@ class TaxoScorer:
             true_answs = p_set.intersection(e_set)
             accuracy += len(true_answs)
             prec_i += len(true_answs) / len(p_set)
+            a += predicted
+            b += expected
+        with open('data/predicted_list.txt', 'w') as file:
+            file.write('\n'.join(a))
+        with open('data/expected_list.txt', 'w') as file:
+            file.write('\n'.join(b))
 
         return coverage / len(etalon_term2parent), wup / coverage, accuracy / coverage, prec_i / len(predicted_term2parent)
 

@@ -46,9 +46,9 @@ class TEMPTermInferencePerformer:
             item = result_buffer[i]
             score = scores[offset + i]
             if item is None:
-                result_buffer[i] = (score, candidate_path)
+                result_buffer[i] = [(score, candidate_path)]
             elif item[0] < score:
-                result_buffer[i] = (score, candidate_path)
+                result_buffer[i].append((score, candidate_path))
 
     def __get_candidates_paths(self, taxonomy_paths, terms):
         candidate_paths = []
