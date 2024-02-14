@@ -48,7 +48,7 @@ def format_result(_terms, results):
         for r in result:
             path = r[1]
             anchors.append(path[-1].name())
-            if len(r) > 2:
+            if len(path) > 2:
                 anchors.append(path[-2].name())
 
         res_str += '{}\t{}\n'.format(term.value, ','.join(anchors))
