@@ -47,11 +47,11 @@ def format_result(_terms, results):
         anchors = []
         for r in result:
             path = r[1]
-            anchors.append(path[-1])
+            anchors.append(path[-1].name())
             if len(r) > 2:
-                anchors.append(path[-2])
+                anchors.append(path[-2].name())
 
-        res_str += '{}\t{}'.format(term.value, ','.join(anchors))
+        res_str += '{}\t{}\n'.format(term.value, ','.join(anchors))
     return res_str
 
 
@@ -62,8 +62,7 @@ def run(terms_batch):
     delta, results = performance.measure(lambda: inference_performer.infer(model, terms_batch))
     print(delta)
     print(results)
-    result = list(map(lambda x: x[1], results))
-    res_str = format_result(terms_batch, result)
+    res_str = format_result(terms_batch, results)
     file_write_lock.acquire()
     with open(result_path, 'a') as append_file:
         append_file.write(res_str)

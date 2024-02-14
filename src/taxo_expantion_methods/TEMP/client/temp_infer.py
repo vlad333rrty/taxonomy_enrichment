@@ -40,7 +40,10 @@ class TEMPTermInferencePerformer:
                 for i in range(len(paths)):
                     self.__update_scores(i * len(term_sysnet_adapters), current_scores, paths[i],
                                          scores_and_paths)
-        return {(k, sorted(v, key=lambda x: -x[0])) for k, v in scores_and_paths}
+
+        for i in range(len(scores_and_paths)):
+            scores_and_paths[i] = sorted(scores_and_paths[i], key=lambda x:-x[0])
+        return scores_and_paths
 
     def __update_scores(self, offset, scores, candidate_path, result_buffer):
         for i in range(len(result_buffer)):
