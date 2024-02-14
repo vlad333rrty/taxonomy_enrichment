@@ -52,11 +52,13 @@ class TEMPTermInferencePerformer:
                 item.append((score, candidate_path))
             else:
                 min = 2
+                r = -1
                 for j in range(len(item)):
                     if item[j][0] < score and min > item[j][0]:
                         r = j
                         min = item[j][0]
-                item[r] = (score, candidate_path)
+                if r > -1:
+                    item[r] = (score, candidate_path)
 
     def __get_candidates_paths(self, taxonomy_paths, terms):
         candidate_paths = []
