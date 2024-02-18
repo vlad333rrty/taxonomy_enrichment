@@ -78,7 +78,7 @@ class TEMPTermInferencePerformerFactory:
     @staticmethod
     def create(device, batch_size):
         wn_reader = WordNetDao.get_wn_20()
-        all_synsets = SynsetsProvider.get_all_synsets_with_common_root(wn_reader.synset('entity.n.01'))
+        all_synsets = SynsetsProvider.get_all_synsets_with_common_root(wn_reader.synset('entity.n.01'))[:10]
         synsets_batches = create_synsets_batch(all_synsets, batch_size)
         tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
         bert_model = BertModel.from_pretrained('bert-base-uncased').to(device)

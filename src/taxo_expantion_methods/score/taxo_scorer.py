@@ -1,3 +1,5 @@
+import random
+
 from nltk.corpus import WordNetCorpusReader
 from nltk.corpus.reader import Synset
 
@@ -79,6 +81,20 @@ class TaxoScorer:
                     wup_max = wup_cur
         return wup_max
 
+    def __enrich_submitted(self, submitted):
+        wn = WordNetDao.get_wn_20()
+        for key in submitted:
+            values = submitted[key]
+            res = []
+            for v in values:
+                res.append(v)
+                h = wn.synset(v).hypernyms()
+                if len(h) > 0:
+                    p = random.choice(wn.synset(v).hypernyms())
+                    res.append(p.name())
+            submitted[key] = res
+        return submitted
+
     def score_taxo_results(self, golden_path, predicted_path):
         """
         format: new_term \t parent
@@ -87,7 +103,7 @@ class TaxoScorer:
         :return: (recall, wup)
         """
         etalon_term2parent = TaxoScorer.__parse_input(golden_path)
-        predicted_term2parent = TaxoScorer.__parse_input(predicted_path, '\t')
+        predicted_term2parent = TaxoScorer.__parse_input(predicted_path)
         coverage = 0
         wup = 0
         accuracy = 0
@@ -121,7 +137,7 @@ class TaxoScorer:
 def run_scorer():
     wn_reader = WordNetDao.get_wn_30()
     scorer = TaxoScorer(wn_reader)
-    results = scorer.score_taxo_results('data/results/taxo_expan/golden.tsv', 'data/results/taxo_expan/predicted.tsv')
+    results = scorer.score_taxo_results('data/results/TEMP/golden.tsv', 'data/results/TEMP/deduped.tsv')
     print(results)
 
 

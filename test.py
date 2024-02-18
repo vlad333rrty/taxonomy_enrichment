@@ -1,25 +1,43 @@
-# import pickle
-#
-# from transformers import BertTokenizer
-#
-# from src.taxo_expantion_methods.TEMP.synsets_provider import SynsetsProvider
-# from src.taxo_expantion_methods.TaxoPrompt.random_walk import create_extended_taxo_graph
-# from src.taxo_expantion_methods.TaxoPrompt.taxo_prompt_dataset_creator import TaxoPromptDsCreator
-# from src.taxo_expantion_methods.common.wn_dao import WordNetDao
-#
-# tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-#
-# ds_c = TaxoPromptDsCreator(tokenizer)
-# root = WordNetDao.get_wn_20().synset('entity.n.01')
-# taxo_graph = create_extended_taxo_graph(root)
-# train_nodes = list(
-#     filter(lambda x: x.get_synset() != root, taxo_graph.values())
-# )
-#
-# s = ds_c.prepare_ds(train_nodes, 6, 5)
-# with open('data/datasets/taxo-prompt/nouns/ds2', 'wb') as file:
-#     pickle.dump(s, file)
-x = {1:[12,2,2,0,4], 2:[1,-1,2]}
-a = {k: sorted(v) for k, v in x.items()}
+t2s = set()
+deduped = []
+with open('data/results/TEMP/predicted4.tsv', 'r') as file:
+    lines = file.readlines()
+    for line in lines:
+        line = line.strip()
+        arr = line.split('\t')
+        term = arr[0]
+        s = arr[1]
+        if (term, s) in t2s:
+            deduped.append(term)
+        else:
+            t2s.add((term, s))
 
-print(a)
+with open('data/results/TEMP/deduped.tsv', 'w') as file:
+    s = ''
+    for key in t2s:
+        s += '{}\t{}\n'.format(key[0], key[1])
+    file.write(s)
+print(len(deduped))
+print(deduped)
+
+
+used_terms = set(
+    map(
+        lambda x: x[0],
+        t2s
+    )
+)
+with open('data/datasets/diachronic-wordnets/en/no_labels_nouns_en.2.0-3.0.tsv', 'r') as file:
+    lines = file.readlines()
+    print(len(lines))
+    words = set()
+    for line in lines:
+        line = line.strip()
+        if line not in used_terms:
+            words.add(line)
+print(len(words))
+with open('data/datasets/diachronic-wordnets/en/no_labels_unprocessed', 'w') as file:
+    s = ''
+    for word in words:
+        s += f'{word}\n'
+    file.write(s)
