@@ -60,7 +60,7 @@ class TEMPTrainer:
                       train_progess_monitor: TrainProgressMonitor):
         for i, batch in (pbar := tqdm(enumerate(train_loader))):
             batch_num = i + 1
-            pbar.set_description(f'EPOCH: {epoch}, BATCH: {batch_num}')
+            pbar.set_description(f'EPOCH: {epoch}, BATCH: {batch_num} / {batch_num}')
             optimizer.zero_grad()
             positive_paths = batch.positive_paths
             negative_paths = batch.negative_paths
