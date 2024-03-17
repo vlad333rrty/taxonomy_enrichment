@@ -41,8 +41,8 @@ def run_temp_model_training_ru(device, epochs, res_path, model, batch_size=32):
     train_synsets, test_synsets = train_test_split(all_synsets, train_size=0.8, test_size=0.2)
     print('Train/test:', len(train_synsets), len(test_synsets))
 
-    tokenizer = BertTokenizer.from_pretrained('ai-forever/sbert_large_nlu_ru')
-    bert_model = BertModel.from_pretrained('ai-forever/sbert_large_nlu_ru').to(device)
+    tokenizer = BertTokenizer.from_pretrained('DeepPavlov/rubert-base-cased')
+    bert_model = BertModel.from_pretrained('DeepPavlov/rubert-base-cased').to(device)
     ds_creator = TEMPDsCreator(all_synsets)
     embedding_provider = TEMPEmbeddingProvider(tokenizer, bert_model, device)
     trainer = TEMPTrainer(embedding_provider, res_path)
