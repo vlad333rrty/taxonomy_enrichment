@@ -7,6 +7,7 @@ from src.taxo_expantion_methods.TEMP.temp_dataset_generator import TEMPDsCreator
 from src.taxo_expantion_methods.TEMP.temp_embeddings_provider import TEMPEmbeddingProvider
 from src.taxo_expantion_methods.TEMP.temp_loss import TEMPLoss
 from src.taxo_expantion_methods.TEMP.trainer import TEMPTrainer
+from src.taxo_expantion_methods.common.SynsetWrapper import RuSynsetWrapper
 from src.taxo_expantion_methods.common.wn_dao import WordNetDao
 
 
@@ -26,5 +27,24 @@ def run_temp_model_training(device, epochs, model, batch_size=32):
     ds_creator = TEMPDsCreator(all_synsets)
     embedding_provider = TEMPEmbeddingProvider(tokenizer, bert_model, device)
     trainer = TEMPTrainer(embedding_provider, 'data/models/TEMP/checkpoints')
+    trainer.train(model, optimizer, loss_fn, lambda: ds_creator.prepare_ds(train_synsets, batch_size),
+                  ds_creator.prepare_ds(test_synsets, batch_size), epochs)
+
+
+def run_temp_model_training_ru(device, epochs, model, batch_size=32):
+    model = model.to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=2e-5, betas=(0.9, 0.999))
+    loss_fn = TEMPLoss(0.2).to(device)
+    dao = WordNetDao.get_ru_wn_21()
+    all_synsets = list(map(RuSynsetWrapper, dao.synsets))
+
+    train_synsets, test_synsets = train_test_split(all_synsets, train_size=0.8, test_size=0.2)
+    print('Train/test:', len(train_synsets), len(test_synsets))
+
+    tokenizer = BertTokenizer.from_pretrained('ai-forever/sbert_large_nlu_ru')
+    bert_model = BertModel.from_pretrained('ai-forever/sbert_large_nlu_ru').to(device)
+    ds_creator = TEMPDsCreator(all_synsets)
+    embedding_provider = TEMPEmbeddingProvider(tokenizer, bert_model, device)
+    trainer = TEMPTrainer(embedding_provider, 'data/models/TEMP/checkpoints/ru')
     trainer.train(model, optimizer, loss_fn, lambda: ds_creator.prepare_ds(train_synsets, batch_size),
                   ds_creator.prepare_ds(test_synsets, batch_size), epochs)

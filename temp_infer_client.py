@@ -14,7 +14,7 @@ device = 'cpu'
 terms_path = 'data/datasets/diachronic-wordnets/en/no_labels_nouns_en.2.0-3.0.tsv'
 load_path = 'data/models/TEMP/pre-trained/temp_model_epoch_10'
 result_path = 'data/results/TEMP/predicted.tsv'
-limit = 10
+limit = 100
 
 
 def read_terms(path, _limit):
@@ -72,6 +72,6 @@ def run(terms_batch):
 
 
 with torch.no_grad():
-  batches = paginate(res_terms, 8)
+  batches = paginate(res_terms, 1)
   for batch in batches:
     run(batch)

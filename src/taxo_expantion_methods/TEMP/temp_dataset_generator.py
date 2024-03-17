@@ -17,9 +17,10 @@ class TEMPDsCreator:
 
     def __select_path(self, node: Synset): # todo holly shit
         paths = node.hypernym_paths()
-        for path in paths:
-            if path[0].name() == 'entity.n.01':
-                return path
+        # for path in paths:
+        #     if path[0].name() == 'entity.n.01':
+        #         return path
+        return paths[0] # todo!!!!
 
     def __get_negative_sample(self, parents, node):
         random_node = random.choice(self.__all_synsets)

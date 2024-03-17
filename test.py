@@ -1,6 +1,6 @@
 t2s = set()
 deduped = []
-with open('data/results/TEMP/predicted4.tsv', 'r') as file:
+with open('data/results/TEMP/deduped.tsv', 'r') as file:
     lines = file.readlines()
     for line in lines:
         line = line.strip()
@@ -11,14 +11,6 @@ with open('data/results/TEMP/predicted4.tsv', 'r') as file:
             deduped.append(term)
         else:
             t2s.add((term, s))
-
-with open('data/results/TEMP/deduped.tsv', 'w') as file:
-    s = ''
-    for key in t2s:
-        s += '{}\t{}\n'.format(key[0], key[1])
-    file.write(s)
-print(len(deduped))
-print(deduped)
 
 
 used_terms = set(
@@ -41,3 +33,5 @@ with open('data/datasets/diachronic-wordnets/en/no_labels_unprocessed', 'w') as 
     for word in words:
         s += f'{word}\n'
     file.write(s)
+
+

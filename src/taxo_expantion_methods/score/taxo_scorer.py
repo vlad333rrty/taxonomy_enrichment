@@ -73,7 +73,7 @@ class TaxoScorer:
             e_s = self.__wn_reader.synset(e)
             for p in predicted_parents:
                 if p not in self.__all_synsets:
-                    print('No synset in current wordnet for', p)
+                    # print('No synset in current wordnet for', p)
                     continue
                 p_s = self.__wn_reader.synset(p)
                 wup_cur = self.__wup(e_s, p_s)
@@ -83,6 +83,8 @@ class TaxoScorer:
 
     def __enrich_submitted(self, submitted):
         wn = WordNetDao.get_wn_20()
+        d = {}
+        i = 0
         for key in submitted:
             values = submitted[key]
             res = []
@@ -90,9 +92,12 @@ class TaxoScorer:
                 res.append(v)
                 h = wn.synset(v).hypernyms()
                 if len(h) > 0:
-                    p = random.choice(wn.synset(v).hypernyms())
-                    res.append(p.name())
+                    hyps = wn.synset(v).hypernyms()
+                    if len(hyps) > 1:
+                        d[len(hyps)] = d.get(len(hyps), 0) + 1
+                    res += list(map(lambda x:x.name(), wn.synset(v).hypernyms()))
             submitted[key] = res
+        print(d)
         return submitted
 
     def score_taxo_results(self, golden_path, predicted_path):
@@ -104,13 +109,12 @@ class TaxoScorer:
         """
         etalon_term2parent = TaxoScorer.__parse_input(golden_path)
         predicted_term2parent = TaxoScorer.__parse_input(predicted_path)
+        # predicted_term2parent = self.__enrich_submitted(predicted_term2parent)
         coverage = 0
         wup = 0
-        accuracy = 0
-        prec_i = 0
+        lemma_match = 0
         a, b = [], []
         for term in etalon_term2parent:
-            print('Processing term', term)
             if term not in predicted_term2parent:
                 print('Missing predicted input for synset', term)
                 continue
@@ -118,12 +122,11 @@ class TaxoScorer:
             expected = etalon_term2parent[term]
             predicted = predicted_term2parent[term]
             wup += self.__get_best_wup(expected, predicted)
-            acc = 0
             p_set = set(predicted)
             e_set = set(expected)
             true_answs = p_set.intersection(e_set)
-            accuracy += len(true_answs)
-            prec_i += len(true_answs) / len(p_set)
+            if len(true_answs) > 0:
+                lemma_match += 1
             a += predicted
             b += expected
         with open('data/predicted_list.txt', 'w') as file:
@@ -131,7 +134,7 @@ class TaxoScorer:
         with open('data/expected_list.txt', 'w') as file:
             file.write('\n'.join(b))
 
-        return coverage / len(etalon_term2parent), wup / coverage, accuracy / coverage, prec_i / len(predicted_term2parent)
+        return coverage / len(etalon_term2parent), wup / coverage, lemma_match / len(etalon_term2parent)
 
 
 def run_scorer():
