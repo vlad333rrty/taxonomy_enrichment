@@ -10,6 +10,7 @@ args.add_argument('-d', '--device', default='cpu', type=str, help='used device')
 args.add_argument('-e', '--epochs', default=None, type=int, help='number of epochs')
 args.add_argument('-l', '--load-path', default=None, type=str, help='path to saved model')
 args.add_argument('-lng', '--language', default='en', type=str, help='en or ru')
+args.add_argument('-res', '--result-path', default='data/models/TEMP/checkpoints', type=str)
 args = args.parse_args()
 
 model = TEMP()
@@ -17,6 +18,6 @@ if args.load_path is not None:
     model.load_state_dict(torch.load(args.load_path, map_location=torch.device(args.device)))
 
 if args.language == 'en':
-    run_temp_model_training(args.device, args.epochs, model)
+    run_temp_model_training(args.device, args.epochs, args.res, model)
 else:
-    run_temp_model_training_ru(args.device, args.epochs, model)
+    run_temp_model_training_ru(args.device, args.epochs, args.res, model)
