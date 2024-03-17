@@ -18,6 +18,6 @@ if args.load_path is not None:
     model.load_state_dict(torch.load(args.load_path, map_location=torch.device(args.device)))
 
 if args.language == 'en':
-    run_temp_model_training(args.device, args.epochs, args.res, model)
+    run_temp_model_training(args.device, args.epochs, args.result_path, model)
 else:
-    run_temp_model_training_ru(args.device, args.epochs, args.res, model)
+    run_temp_model_training_ru(args.device, args.epochs, args.result_path, model)
