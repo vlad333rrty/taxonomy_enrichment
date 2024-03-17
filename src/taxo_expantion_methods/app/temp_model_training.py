@@ -35,7 +35,7 @@ def run_temp_model_training_ru(device, epochs, res_path, model, batch_size=32):
     model = model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=2e-5, betas=(0.9, 0.999))
     loss_fn = TEMPLoss(0.2).to(device)
-    dao = WordNetDao.get_ru_wn_21()
+    dao = WordNetDao.get_ru_wn_20()
     all_synsets = list(map(RuSynsetWrapper, dao.synsets))
 
     train_synsets, test_synsets = train_test_split(all_synsets, train_size=0.8, test_size=0.2)
