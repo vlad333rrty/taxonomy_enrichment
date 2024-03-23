@@ -9,7 +9,7 @@ from src.taxo_expantion_methods.TaxoPrompt.taxo_prompt_model import TaxoPrompt
 from src.taxo_expantion_methods.TaxoPrompt.trainer import TaxoPromptTrainer
 
 
-def run(device, epochs, train_ration, ds_path, load_path=None):
+def run(device, epochs, train_ration, ds_path, load_path=None, res_path=None):
     with open(ds_path, 'rb')as file:
         ds = pickle.load(file)
     X_train, X_test_val = train_test_split(ds, train_size=train_ration)
@@ -31,5 +31,5 @@ def run(device, epochs, train_ration, ds_path, load_path=None):
         model,
         loss,
         optimizer,
-        'data/models/TaxoPrompt/checkpoints')
+        'data/models/TaxoPrompt/checkpoints' if res_path is None else res_path)
     trainer.train(X_train, device, epochs)
