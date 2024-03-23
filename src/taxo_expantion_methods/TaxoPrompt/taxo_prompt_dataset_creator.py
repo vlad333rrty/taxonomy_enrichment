@@ -67,23 +67,7 @@ class TaxoPromptDsCreator:
         taxonomic_context, masked_context = self.__build_extended_taxonomic_context(concept_node, limit, tau)
         return _TaxoPrompt(concept, random_parent, taxonomic_context, masked_context)
 
-
-    # def set_mask(self, ids):
-    #     it_t, is_t = self.__tokenizer.vocab['it'], self.__tokenizer.vocab['is']
-    #     for i in range(len(ids)):
-    #         if ids[i] == it_t and ids[i + 1] == is_t:
-    #             break
-    #     j = i + 2
-    #     while j < len(ids):
-    #         ids[j] = self.__tokenizer.mask_token_id
-    #         j += 1
-    #     return ids
-
     def __taxo_prompt_to_str(self, taxo_prompt):
-        sep = '[SEP]'
-        base_str = f'What is {Relation.PARENT_OF.value} {get_synset_simple_name(taxo_prompt.concept)}? it is {get_synset_simple_name(taxo_prompt.parent)}'
-        bas_str_mask = f'What is {Relation.PARENT_OF.value} {get_synset_simple_name(taxo_prompt.concept)}? it is [MASK]'
-
         pdef = taxo_prompt.parent.definition()
         ids = self.__tokenizer.encode_plus(
             pdef,
@@ -92,13 +76,8 @@ class TaxoPromptDsCreator:
             add_special_tokens=False
         )['input_ids']
 
-
-        p1 = f'{bas_str_mask}{sep}{taxo_prompt.concept.definition()}'
-        p2 = f'{bas_str_mask}{sep}{taxo_prompt.masked_taxonomic_context}'
-        p_res = ' '.join([p1, '[MASK]' * len(ids), p2])
-        e1 = f'{base_str}{sep}{taxo_prompt.concept.definition()}'
-        e2 = f'{base_str}{sep}{taxo_prompt.taxonomic_context}'
-        e_res = ' '.join([e1, pdef, e2])
+        p_res = ' '.join([taxo_prompt.concept.definition(), '[MASK]' * len(ids), taxo_prompt.taxonomic_context])
+        e_res = ' '.join([taxo_prompt.concept.definition(), pdef, taxo_prompt.taxonomic_context])
         return p_res, e_res
 
     def prepare_ds(self, train_nodes, relations_limit, tau, batch_size=8):
