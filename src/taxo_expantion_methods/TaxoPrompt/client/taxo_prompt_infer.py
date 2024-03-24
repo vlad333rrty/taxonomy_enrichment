@@ -40,7 +40,7 @@ class Inferer:
         return base_t
 
     def score(self, output, tokens, prompt):
-        for i in range(len(prompt) - 1, 0, -1):
+        for i in range(len(prompt) - 2, 0, -1):
             if prompt[i] != self.__tokenizer.mask_token_id:
                 break
         i = i + 1
