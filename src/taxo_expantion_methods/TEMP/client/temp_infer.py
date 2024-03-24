@@ -83,3 +83,12 @@ class TEMPTermInferencePerformerFactory:
         tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
         bert_model = BertModel.from_pretrained('bert-base-uncased').to(device)
         return TEMPTermInferencePerformer(synsets_batches, TEMPEmbeddingProvider(tokenizer, bert_model, device))
+
+    @staticmethod
+    def create_ru(device, batch_size):
+        wn_reader = WordNetDao.get_ru_wn_20()
+        all_synsets = wn_reader.synsets
+        synsets_batches = create_synsets_batch(all_synsets, batch_size)
+        tokenizer = BertTokenizer.from_pretrained('DeepPavlov/rubert-base-cased')
+        bert_model = BertModel.from_pretrained('DeepPavlov/rubert-base-cased').to(device)
+        return TEMPTermInferencePerformer(synsets_batches, TEMPEmbeddingProvider(tokenizer, bert_model, device))
