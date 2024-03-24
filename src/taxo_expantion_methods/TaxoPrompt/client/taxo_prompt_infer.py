@@ -25,12 +25,11 @@ class Inferer:
             j += 1
         return (start, j)
 
-    def __taxo_prompt_to_str(self, concepts, definitions, parent):
-        pdef = parent.definition()
+    def __taxo_prompt_to_str(self, concepts, definitions, parent_tokens):
         xs = []
         for i in range(len(concepts)):
             descr = definitions[i]
-            xs.append(' '.join([descr, '[MASK]' * len(pdef)]))
+            xs.append(' '.join([descr, '[MASK]' * len(parent_tokens)]))
 
         base_t = self.__tokenizer.batch_encode_plus(
             xs,
@@ -40,13 +39,13 @@ class Inferer:
         return base_t
 
     def score(self, output, tokens, prompt):
+        res = 0
+        j = len(tokens) - 1
         for i in range(len(prompt) - 2, 0, -1):
             if prompt[i] != self.__tokenizer.mask_token_id:
                 break
-        i = i + 1
-        res = 0
-        for j in range(len(tokens)):
             res += output[i][tokens[j]]
+            j -= 1
         return res / len(tokens)
 
     def infer(self, model, concepts, definitions, device):
@@ -59,7 +58,7 @@ class Inferer:
                     truncation=True,
                     add_special_tokens=False
                 )['input_ids']
-                prompts = self.__taxo_prompt_to_str(concepts, definitions, anchor)
+                prompts = self.__taxo_prompt_to_str(concepts, definitions, tokens)
                 outputs = self.__bert(
                     prompts.to(device),
                     output_hidden_states=True
