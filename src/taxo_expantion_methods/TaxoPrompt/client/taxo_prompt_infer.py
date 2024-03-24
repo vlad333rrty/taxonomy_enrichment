@@ -26,14 +26,11 @@ class Inferer:
         return (start, j)
 
     def __taxo_prompt_to_str(self, concepts, definitions, parent):
-        sep = '[SEP]'
         pdef = parent.definition()
         xs = []
         for i in range(len(concepts)):
-            pr = f'What is {Relation.PARENT_OF.value} {concepts[i]}? it is [MASK]'
             descr = definitions[i]
-            pr_res = f'{pr}[SEP]{descr}'
-            xs.append(' '.join([pr_res, '[MASK]' * len(pdef)]))
+            xs.append(' '.join([descr, '[MASK]' * len(pdef)]))
 
         base_t = self.__tokenizer.batch_encode_plus(
             xs,
@@ -43,7 +40,7 @@ class Inferer:
         return base_t
 
     def score(self, output, tokens, prompt):
-        for i in range(len(prompt) - 2, 0, -1):
+        for i in range(len(prompt) - 1, 0, -1):
             if prompt[i] != self.__tokenizer.mask_token_id:
                 break
         i = i + 1
