@@ -5,6 +5,7 @@ from transformers import BertTokenizer, BertModel
 from src.taxo_expantion_methods.TEMP.synsets_provider import SynsetsProvider, create_synsets_batch
 from src.taxo_expantion_methods.TEMP.temp_embeddings_provider import TEMPEmbeddingProvider
 from src.taxo_expantion_methods.TEMP.temp_model import TEMP
+from src.taxo_expantion_methods.common.SynsetWrapper import RuSynsetWrapper
 from src.taxo_expantion_methods.common.Term import Term
 from src.taxo_expantion_methods.common.wn_dao import WordNetDao
 
@@ -87,7 +88,7 @@ class TEMPTermInferencePerformerFactory:
     @staticmethod
     def create_ru(device, batch_size):
         wn_reader = WordNetDao.get_ru_wn_20()
-        all_synsets = wn_reader.synsets
+        all_synsets = list(map(RuSynsetWrapper, wn_reader.synsets))
         synsets_batches = create_synsets_batch(all_synsets, batch_size)
         tokenizer = BertTokenizer.from_pretrained('DeepPavlov/rubert-base-cased')
         bert_model = BertModel.from_pretrained('DeepPavlov/rubert-base-cased').to(device)
