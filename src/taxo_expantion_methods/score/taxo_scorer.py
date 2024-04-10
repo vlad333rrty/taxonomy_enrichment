@@ -140,7 +140,7 @@ class TaxoScorer:
 def run_scorer():
     wn_reader = WordNetDao.get_wn_30()
     scorer = TaxoScorer(wn_reader)
-    results = scorer.score_taxo_results('data/results/TEMP/golden.tsv', 'data/results/TEMP/deduped.tsv')
+    results = scorer.score_taxo_results('data/results/TEMP/golden.tsv', 'data/results/TEMP/predicted.tsv')
     print(results)
 
 

@@ -7,6 +7,7 @@ from transformers import BertConfig
 from src.taxo_expantion_methods.TaxoPrompt.client.taxo_prompt_infer import TaxoPromptTermInferencePerformerFactory
 from src.taxo_expantion_methods.TaxoPrompt.taxo_prompt_model import TaxoPrompt
 from src.taxo_expantion_methods.common import performance
+from src.taxo_expantion_methods.common.SynsetWrapper import RuSynsetWrapper
 from src.taxo_expantion_methods.common.Term import Term
 from src.taxo_expantion_methods.common.wn_dao import WordNetDao
 from src.taxo_expantion_methods.utils.utils import paginate
@@ -64,6 +65,6 @@ def run(terms_batch):
     print('Got result for {} terms'.format(len(terms_batch)))
 
 with torch.no_grad():
-    batches = paginate(res_terms, 1)
+    batches = paginate(res_terms, 8)
     for batch in batches:
         run(batch)

@@ -36,4 +36,4 @@ class RuSynsetWrapper: # adapter?
 
     def definition(self):
         definition = self.__synset.definition
-        return definition if len(definition) > 0 else self.name()
+        return definition

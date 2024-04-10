@@ -1,6 +1,6 @@
 t2s = set()
 deduped = []
-with open('data/results/TEMP/deduped.tsv', 'r') as file:
+with open('data/results/TEMP/predicted.tsv', 'r') as file:
     lines = file.readlines()
     for line in lines:
         line = line.strip()
