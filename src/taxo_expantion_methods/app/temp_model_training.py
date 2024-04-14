@@ -11,11 +11,10 @@ from src.taxo_expantion_methods.common.SynsetWrapper import RuSynsetWrapper
 from src.taxo_expantion_methods.common.wn_dao import WordNetDao
 
 
-def run_temp_model_training(device, epochs, res_path, model, batch_size=32):
+def run_temp_model_training(device, epochs, res_path, model, wn_reader, batch_size=32):
     model = model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=2e-5, betas=(0.9, 0.999))
     loss_fn = TEMPLoss(0.2).to(device)
-    wn_reader = WordNetDao.get_wn_20()
     # all_synsets = list(wn_reader.all_synsets(wn_reader.NOUN))
     all_synsets = SynsetsProvider.get_all_synsets_with_common_root(wn_reader.synset('entity.n.01'))
 

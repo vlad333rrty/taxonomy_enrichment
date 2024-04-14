@@ -4,6 +4,7 @@ import torch
 
 from src.taxo_expantion_methods.TEMP.temp_model import TEMP
 from src.taxo_expantion_methods.app.temp_model_training import run_temp_model_training, run_temp_model_training_ru
+from src.taxo_expantion_methods.common.wn_dao import WordNetDao
 
 args = argparse.ArgumentParser(description='Training taxonomy expansion model')
 args.add_argument('-d', '--device', default='cpu', type=str, help='used device')
@@ -18,6 +19,7 @@ if args.load_path is not None:
     model.load_state_dict(torch.load(args.load_path, map_location=torch.device(args.device)))
 
 if args.language == 'en':
-    run_temp_model_training(args.device, args.epochs, args.result_path, model)
+    wn_reader = WordNetDao.get_wn_30()
+    run_temp_model_training(args.device, args.epochs, args.result_path, wn_reader, model)
 else:
     run_temp_model_training_ru(args.device, args.epochs, args.result_path, model)
