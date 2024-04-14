@@ -1,3 +1,5 @@
+import time
+
 from transformers import BertTokenizer, BertModel
 
 from src.taxo_expantion_methods.utils.utils import get_synset_simple_name
@@ -18,6 +20,7 @@ class TEMPEmbeddingProvider:
                                      ' '.join(map(lambda x: get_synset_simple_name(x), reversed_path[1:])))
             )
 
+        start = time.time()
         encoding = self.__tokenizer.batch_encode_plus(
             tokens,
             padding=True,
@@ -25,8 +28,11 @@ class TEMPEmbeddingProvider:
             return_tensors='pt',
             add_special_tokens=True
         )
+        end = time.time()
+        print('Encoding finished in', end - start)
         input_ids = encoding['input_ids'].to(self.__device)
         attention_mask = encoding['attention_mask'].to(self.__device)
         outputs = self.__bert_model(input_ids, attention_mask=attention_mask)
         cls_embedding = outputs.last_hidden_state[:, 0, :]
+        print('Got embedding in', time.time() - end)
         return cls_embedding
