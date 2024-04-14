@@ -20,6 +20,6 @@ if args.load_path is not None:
 
 if args.language == 'en':
     wn_reader = WordNetDao.get_wn_30()
-    run_temp_model_training(args.device, args.epochs, args.result_path, wn_reader, model)
+    run_temp_model_training(args.device, args.epochs, args.result_path, model, wn_reader)
 else:
     run_temp_model_training_ru(args.device, args.epochs, args.result_path, model)
