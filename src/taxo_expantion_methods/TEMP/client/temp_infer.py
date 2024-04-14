@@ -5,6 +5,7 @@ from transformers import BertTokenizer, BertModel
 from src.taxo_expantion_methods.TEMP.synsets_provider import SynsetsProvider, create_synsets_batch
 from src.taxo_expantion_methods.TEMP.temp_embeddings_provider import TEMPEmbeddingProvider
 from src.taxo_expantion_methods.TEMP.temp_model import TEMP
+from src.taxo_expantion_methods.common import performance
 from src.taxo_expantion_methods.common.SynsetWrapper import RuSynsetWrapper
 from src.taxo_expantion_methods.common.Term import Term
 from src.taxo_expantion_methods.common.wn_dao import WordNetDao
@@ -71,8 +72,11 @@ class TEMPTermInferencePerformer:
         return candidate_paths
 
     def __get_scores_for_path(self, model, paths):
-        embeddings = self.__embedding_provider.get_path_embeddings(paths)
-        return model(embeddings)
+        delta, embeddings = performance.measure(lambda: self.__embedding_provider.get_path_embeddings(paths))
+        print('Embedding generated in', delta)
+        delta, result = performance.measure(lambda: model(embeddings))
+        print('Received model result in', delta)
+        return result
 
 
 class TEMPTermInferencePerformerFactory:
