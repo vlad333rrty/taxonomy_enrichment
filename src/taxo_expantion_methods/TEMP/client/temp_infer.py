@@ -72,12 +72,8 @@ class TEMPTermInferencePerformer:
         return candidate_paths
 
     def __get_scores_for_path(self, model, paths):
-        delta, embeddings = performance.measure(lambda: self.__embedding_provider.get_path_embeddings(paths))
-        print('Embedding generated in', delta)
-        delta, result = performance.measure(lambda: model(embeddings))
-        print('Received model result in', delta)
-        return result
-
+        embeddings = self.__embedding_provider.get_path_embeddings(paths)
+        return model(embeddings)
 
 class TEMPTermInferencePerformerFactory:
     @staticmethod
