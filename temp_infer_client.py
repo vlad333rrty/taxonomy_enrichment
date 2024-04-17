@@ -8,6 +8,7 @@ from src.taxo_expantion_methods.TEMP.temp_model import TEMP
 from src.taxo_expantion_methods.common import performance, RuWordNetDao
 from src.taxo_expantion_methods.common.Term import Term
 from src.taxo_expantion_methods.common.wn_dao import WordNetDao
+from src.taxo_expantion_methods.engines.word_to_add_data import WordToAddDataParser
 from src.taxo_expantion_methods.utils.utils import paginate
 
 device = 'cpu'
@@ -16,22 +17,11 @@ load_path = 'data/models/TEMP/pre-trained/temp_model_ru'
 result_path = 'data/results/TEMP/predicted_ru.tsv'
 limit = 100
 
-
-def read_terms(path, _limit):
-    with open(path, 'r') as _file:
-        res = []
-        for i in range(_limit):
-            res.append(_file.readline().strip())
-        return res
-
-
-wn_reader = RuWordNetDao.get_ru_wn_21()
-terms = read_terms(terms_path, limit)
+terms = WordToAddDataParser.from_pandas(terms_path, '$')
 
 res_terms = []
 for term in terms:
-    synsets = wn_reader.get_synsets(term)
-    res_terms += list(map(lambda x: Term(term, x.definition), synsets))
+    res_terms.append(Term(term.value(), term.definition()))
 
 model = TEMP().to(device)
 model.load_state_dict(torch.load(load_path, map_location=torch.device(device)))

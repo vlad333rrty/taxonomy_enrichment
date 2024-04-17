@@ -9,7 +9,7 @@ class TEMPLoss(nn.Module):
     def __gamma(self, p1, p2):
         p1 = set(p1)
         p2 = set(p2)
-        return (len(p1.union(p2)) / (len(p1.intersection(p2)) + 1)- 1) * self.__k
+        return (len(p1.union(p2)) / len(p1.intersection(p2)) - 1) * self.__k
 
     def forward(self, positive_paths, negative_paths, positive_outputs, negative_outputs):
         r = 0
