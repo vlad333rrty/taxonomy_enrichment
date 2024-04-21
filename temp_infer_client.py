@@ -5,7 +5,7 @@ import torch
 
 from src.taxo_expantion_methods.TEMP.client.temp_infer import TEMPTermInferencePerformerFactory
 from src.taxo_expantion_methods.TEMP.temp_model import TEMP
-from src.taxo_expantion_methods.common import performance, RuWordNetDao
+from src.taxo_expantion_methods.common import performance, ru_wn_dao
 from src.taxo_expantion_methods.common.Term import Term
 from src.taxo_expantion_methods.common.wn_dao import WordNetDao
 from src.taxo_expantion_methods.engines.word_to_add_data import WordToAddDataParser
