@@ -11,16 +11,10 @@ class PathsBatch:
 
 
 class TEMPDsCreator:
-    def __init__(self, all_synsets, negative_samples_per_node=1):
+    def __init__(self, all_synsets, path_selector, negative_samples_per_node=1):
         self.__all_synsets = all_synsets
+        self.__path_selector = path_selector
         self.__negative_samples_per_node = negative_samples_per_node
-
-    def __select_path(self, node: Synset): # todo holly shit
-        paths = node.hypernym_paths()
-        for path in paths:
-            if path[0].name() == 'entity.n.01':
-                return path
-        return paths[0] # todo!!!!
 
     def __get_negative_sample(self, parents, node):
         random_node = random.choice(self.__all_synsets)
@@ -32,10 +26,10 @@ class TEMPDsCreator:
                 break
             i += 1
         if i > 0: print('Chose node in', i, 'iterations')
-        return self.__select_path(random_node) + [node]
+        return self.__path_selector.select_path(random_node) + [node]
 
     def __collect_sample_paths(self, node: Synset):
-        path = self.__select_path(node)
+        path = self.__path_selector.select_path(node)
         res = [path]
         for i in range(self.__negative_samples_per_node):
             res.append(self.__get_negative_sample(set(node.hypernyms()), node))

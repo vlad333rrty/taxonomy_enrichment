@@ -23,7 +23,7 @@ class RuSynsetWrapper: # adapter?
 
         return list(
             map(
-                lambda x: x[0],
+                lambda x: list(reversed(x[0])),
                 sorted(candidates, key=lambda x: -x[1])
             )
         )
@@ -32,8 +32,14 @@ class RuSynsetWrapper: # adapter?
         return self.__synset.title
 
     def hypernyms(self):
-        return self.__synset.hypernyms
+        return list(map(RuSynsetWrapper, self.__synset.hypernyms))
 
     def definition(self):
         definition = self.__synset.definition
         return definition
+
+    def __repr__(self):
+        return self.__synset.__repr__()
+
+    def id(self):
+        return self.__synset.id
