@@ -42,7 +42,7 @@ class PlotMonitor:
         plt.ioff()
         self.__lock.release()
 
-    def __get_sma(self, label, n=7):
+    def __get_sma(self, label, n=10):
         accum = 0
         values = self.__buffers[label]
         bound = min(len(values), n)
