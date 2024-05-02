@@ -1,11 +1,17 @@
+import time
+
 from ruwordnet.models import Synset
+
+from src.taxo_expantion_methods.common.logger import ConsoleLogger
 
 
 class RuSynsetWrapper: # adapter?
     def __init__(self, synset: Synset):
         self.__synset = synset
+        self.__logger = ConsoleLogger(RuSynsetWrapper.__qualname__)
 
     def hypernym_paths(self):
+        start = time.time()
         candidates = []
         stack = []
         stack.append((self.__synset, 0, [RuSynsetWrapper(self.__synset)]))
@@ -21,12 +27,15 @@ class RuSynsetWrapper: # adapter?
                     stack.append((parent, h + 1, u_h[2] + [RuSynsetWrapper(parent)]))
             used.add(u)
 
-        return list(
+        result =  list(
             map(
                 lambda x: list(reversed(x[0])),
                 sorted(candidates, key=lambda x: -x[1])
             )
         )
+        end = time.time()
+        self.__logger.info('Gathered hypernym paths in {} sec', end - start)
+        return result
 
     def name(self):
         return self.__synset.title
