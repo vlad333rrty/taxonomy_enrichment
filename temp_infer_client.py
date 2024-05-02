@@ -1,5 +1,4 @@
 import threading
-from multiprocessing.pool import ThreadPool
 
 import torch
 
@@ -12,21 +11,21 @@ from src.taxo_expantion_methods.engines.word_to_add_data import WordToAddDataPar
 from src.taxo_expantion_methods.utils.utils import paginate
 
 device = 'cpu'
-terms_path = 'data/datasets/diachronic-wordnets/ru/nouns_public_no_labels.tsv'
-load_path = 'data/models/TEMP/pre-trained/temp_model_ru'
-result_path = 'data/results/TEMP/predicted_ru.tsv'
-limit = 100
+terms_path = 'data/datasets/semeval/training_data.csv'
+load_path = 'data/models/TEMP/pre-trained/temp_model_epoch_7'
+result_path = 'data/results/TEMP/predicted2.tsv'
+limit = 1
 
 terms = WordToAddDataParser.from_pandas(terms_path, '$')
 
 res_terms = []
 for term in terms:
-    res_terms.append(Term(term.value(), term.definition()))
+    res_terms.append(Term(term.value, term.definition))
 
 model = TEMP().to(device)
 model.load_state_dict(torch.load(load_path, map_location=torch.device(device)))
 
-inference_performer = TEMPTermInferencePerformerFactory.create(device, 16)
+inference_performer = TEMPTermInferencePerformerFactory.create(device, 16, WordNetDao.get_wn_30())
 
 
 def format_result(_terms, results):
@@ -60,8 +59,7 @@ def run(terms_batch):
     print('Got result for {} terms'.format(len(terms_batch)))
 
 
-
 with torch.no_grad():
-  batches = paginate(res_terms, 1)
-  for batch in batches:
-    run(batch)
+    batches = paginate(res_terms, 1)
+    for batch in batches:
+        run(batch)

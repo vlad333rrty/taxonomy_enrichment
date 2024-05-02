@@ -20,7 +20,7 @@ def run_temp_model_training(device, epochs, res_path, model, wn_reader, batch_si
     loss_fn = TEMPLoss(0.2).to(device)
     all_synsets = SynsetsProvider.get_all_synsets_with_common_root(wn_reader.synset('entity.n.01'))
 
-    train_synsets, test_synsets = train_test_split(all_synsets, train_size=0.8, test_size=0.1)
+    train_synsets, test_synsets = train_test_split(all_synsets, train_size=0.8, test_size=0.2)
     print('Train/test:', len(train_synsets), len(test_synsets))
 
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
@@ -28,8 +28,15 @@ def run_temp_model_training(device, epochs, res_path, model, wn_reader, batch_si
     ds_creator = TEMPDsCreator(all_synsets, WnPathSelector())
     embedding_provider = TEMPEmbeddingProvider(tokenizer, bert_model, device)
     trainer = TEMPTrainer(embedding_provider, res_path)
-    trainer.train(model, optimizer, loss_fn, lambda: ds_creator.prepare_ds(train_synsets, batch_size),
-                  ds_creator.prepare_ds(test_synsets, batch_size), epochs)
+    def train_synsets_provider(): return train_test_split(all_synsets, train_size=0.8, test_size=0.1)[0]
+    trainer.train(
+        model,
+        optimizer,
+        loss_fn,
+        lambda: ds_creator.prepare_ds(train_synsets_provider(), batch_size),
+        ds_creator.prepare_ds(test_synsets, batch_size),
+        epochs
+    )
 
 
 def run_temp_model_training_ru(device, epochs, res_path, model, batch_size=32):
@@ -44,7 +51,7 @@ def run_temp_model_training_ru(device, epochs, res_path, model, batch_size=32):
         )
     )
 
-    train_synsets, test_synsets = train_test_split(all_synsets, train_size=0.8, test_size=0.1)
+    train_synsets, test_synsets = train_test_split(all_synsets, train_size=0.8, test_size=0.2)
     print('Train/test:', len(train_synsets), len(test_synsets))
 
     tokenizer = BertTokenizer.from_pretrained('DeepPavlov/rubert-base-cased')
@@ -56,5 +63,10 @@ def run_temp_model_training_ru(device, epochs, res_path, model, batch_size=32):
     ds_creator = TEMPDsCreator(all_synsets, RuWnPathSelector(random.choice(noun_roots)))
     embedding_provider = TEMPEmbeddingProvider(tokenizer, bert_model, device)
     trainer = TEMPTrainer(embedding_provider, res_path)
-    trainer.train(model, optimizer, loss_fn, lambda: TEMPDsCreator(all_synsets, RuWnPathSelector(random.choice(noun_roots))).prepare_ds(train_synsets, batch_size),
-                  ds_creator.prepare_ds(test_synsets, batch_size), epochs)
+    def train_synsets_provider(): return train_test_split(all_synsets, train_size=0.8, test_size=0.1)[0]
+    trainer.train(
+        model,
+        optimizer,
+        loss_fn,
+        lambda: TEMPDsCreator(all_synsets, RuWnPathSelector(random.choice(noun_roots))).prepare_ds(train_synsets_provider(), batch_size),
+        ds_creator.prepare_ds(test_synsets, batch_size), epochs)
