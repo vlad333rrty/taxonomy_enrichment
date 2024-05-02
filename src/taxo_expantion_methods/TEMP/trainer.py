@@ -74,7 +74,7 @@ class TEMPTrainer:
 
             train_progess_monitor.step(model, epoch, batch_num, len(train_loader), loss, loss_fn)
 
-    def __save_checkpoint(self, model, optimizer, epoch):
+    def __save_checkpoint(self, model, epoch):
         save_path = os.path.join(self.__checkpoint_save_path, 'temp_model_epoch_{}'.format(epoch))
         torch.save(model.state_dict(), save_path)
 
@@ -84,4 +84,4 @@ class TEMPTrainer:
         for epoch in range(epochs):
             train_loader = train_ds_provider()
             self.__train_epoch(model, temp_loss, optimizer, train_loader, epoch, monitor)
-            self.__save_checkpoint(model, optimizer, epoch)
+            self.__save_checkpoint(model, epoch)
