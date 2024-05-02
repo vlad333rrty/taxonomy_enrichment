@@ -20,7 +20,7 @@ class PlotMonitor:
         self.__lock.acquire()
         label = metric.label
         if label not in self.__buffers:
-            self.__buffers[label] = []
+            self.__buffers[label] = [] # todo there is no need to store all these values
             self.__sma_by_label[label] = []
         self.__buffers[label].append(metric.value)
         sma = self.__get_sma(label)
