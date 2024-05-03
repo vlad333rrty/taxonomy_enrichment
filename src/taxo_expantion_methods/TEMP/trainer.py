@@ -46,6 +46,7 @@ class TrainProgressMonitor:
 
             test_loss = test_running_right / test_running_total
             print(f'Test loss: {test_loss:.3f}')
+            self.__plot_monitor.accept(Metric('Test_loss', test_loss))
             self.__plot_monitor.plot()
 
             model.train()
