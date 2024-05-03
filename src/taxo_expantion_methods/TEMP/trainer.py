@@ -46,7 +46,7 @@ class TrainProgressMonitor:
 
             test_loss = test_running_right / test_running_total
             print(f'Test loss: {test_loss:.3f}')
-            self.__plot_monitor.accept(Metric('Test_loss', test_loss))
+            self.__plot_monitor.accept(Metric('Test loss', test_loss.cpu()))
             self.__plot_monitor.plot()
 
             model.train()
@@ -81,7 +81,7 @@ class TEMPTrainer:
 
     def train(self, model, optimizer, temp_loss, train_ds_provider, valid_loader, epochs):
         plot_monitor = PlotMonitor()
-        monitor = TrainProgressMonitor(500, valid_loader, epochs, plot_monitor, self.__embedding_provider)
+        monitor = TrainProgressMonitor(10, valid_loader, epochs, plot_monitor, self.__embedding_provider)
         for epoch in range(epochs):
             train_loader = train_ds_provider()
             self.__train_epoch(model, temp_loss, optimizer, train_loader, epoch, monitor)
