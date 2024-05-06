@@ -20,19 +20,18 @@ def run_temp_model_training(device, epochs, res_path, model, wn_reader, batch_si
     loss_fn = TEMPLoss(0.2).to(device)
     all_synsets = SynsetsProvider.get_all_synsets_with_common_root(wn_reader.synset('entity.n.01'))
 
-    _, validation_synsets = train_test_split(all_synsets, test_size=0.1)
+    train_synsets, validation_synsets = train_test_split(all_synsets, train_size=0.8, test_size=0.05)
 
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
     bert_model = BertModel.from_pretrained('bert-base-uncased').to(device)
     ds_creator = TEMPDsCreator(all_synsets, WnPathSelector())
     embedding_provider = TEMPEmbeddingProvider(tokenizer, bert_model, device)
     trainer = TEMPTrainer(embedding_provider, res_path)
-    def train_synsets_provider(): return train_test_split(all_synsets, train_size=0.5)[0]
     trainer.train(
         model,
         optimizer,
         loss_fn,
-        lambda: ds_creator.prepare_ds(train_synsets_provider(), batch_size),
+        lambda: ds_creator.prepare_ds(train_synsets, batch_size),
         ds_creator.prepare_ds(validation_synsets, batch_size),
         epochs
     )

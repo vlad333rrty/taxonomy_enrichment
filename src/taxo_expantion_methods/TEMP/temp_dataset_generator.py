@@ -26,7 +26,7 @@ class TEMPDsCreator:
                 break
             i += 1
         if i > 0: print('Chose node in', i, 'iterations')
-        return self.__path_selector.select_path(random_node) + [node]
+        return self.__path_selector.select_path(random_node)[:-1] + [node]
 
     def __collect_sample_paths(self, node: Synset):
         path = self.__path_selector.select_path(node)
@@ -43,7 +43,8 @@ class TEMPDsCreator:
         start = time.time()
         samples = []
         for synset in train_synsets:
-            self.__process_node(synset, samples)
+            if len(synset.hyponyms()) == 0:  # only leaf nodes
+                self.__process_node(synset, samples)
         end = time.time()
         print('Finised creating samples in', end - start, 'seconds')
 

@@ -39,21 +39,31 @@ def prepare_wordnet_for_training(wn_path: str, train_ratio: float):
 
     print('Splitting data in train/test with train ratio', train_ratio)
     terms_train, terms_test_val = train_test_split(terms, train_size=train_ratio)
-    terms_val, terms_test = train_test_split(terms_test_val, train_size=0.1, test_size=0.1)
+    train2, train3 = train_test_split(terms_test_val, train_size=0.5)
+    print('Got', len(terms_train), 'terms for training')
+    terms_val, terms_test = train_test_split(terms, train_size=0.02, test_size=0.02)
 
     relations_formatted = taxo_formatter.taxo_relations_format(relations)
     terms_train_formatted = taxo_formatter.terms_format(terms_train)
+
+    train2_f = taxo_formatter.terms_format(train2)
+    train3_f = taxo_formatter.terms_format(train3)
+
     terms_test_formatted = taxo_formatter.terms_format(terms_test)
     terms_val_formatted = taxo_formatter.terms_format(terms_val)
     all_terms_formatted = taxo_formatter.terms_format(terms)
     term_and_embed_formatted = taxo_formatter.embed_format(term_and_embed, 300)
 
-    __write_to_file('data/taxo_ds/wordnet_nouns.taxo', relations_formatted)
-    __write_to_file('data/taxo_ds/wordnet_nouns.terms.train', terms_train_formatted)
-    __write_to_file('data/taxo_ds/wordnet_nouns.terms.test', terms_test_formatted)
-    __write_to_file('data/taxo_ds/wordnet_nouns.terms.validation', terms_val_formatted)
-    __write_to_file('data/taxo_ds/wordnet_nouns.terms', all_terms_formatted)
-    __write_to_file('data/taxo_ds/wordnet_nouns.terms.fasttext.embed', term_and_embed_formatted)
+    __write_to_file('data/datasets/taxo_expan/wordnet_nouns.taxo', relations_formatted)
+    __write_to_file('data/datasets/taxo_expan/wordnet_nouns.terms.train', terms_train_formatted)
+
+    __write_to_file('data/datasets/taxo_expan/wordnet_nouns.terms.train2', train2_f)
+    __write_to_file('data/datasets/taxo_expan/wordnet_nouns.terms.train3', train3_f)
+
+    __write_to_file('data/datasets/taxo_expan/wordnet_nouns.terms.test', terms_test_formatted)
+    __write_to_file('data/datasets/taxo_expan/wordnet_nouns.terms.validation', terms_val_formatted)
+    __write_to_file('data/datasets/taxo_expan/wordnet_nouns.terms', all_terms_formatted)
+    __write_to_file('data/datasets/taxo_expan/wordnet_nouns.terms.fasttext.embed', term_and_embed_formatted)
     end = time.time()
     print('Finished in', end - start, 'seconds')
 
@@ -71,8 +81,8 @@ def prepare_terms_for_inference(ds_path):
         )
     )
     infer_terms_formatted = TaxoInferFormatter.terms_infer_format(terms_and_embeddings)
-    __write_to_file('data/taxo_ds/wordnet_nouns.infer.terms', infer_terms_formatted)
+    __write_to_file('data/datasets/taxo_expan/wordnet_nouns.infer.terms', infer_terms_formatted)
 
 
-prepare_wordnet_for_training('data/wordnets/WordNet-2.0/dict', 0.6)
-# prepare_terms_for_inference('data/datasets_processing/diachronic-wordnets/en/no_labels_nouns_en.2.0-3.0.tsv')
+prepare_wordnet_for_training('data/wordnets/WordNet-3.0/dict', 0.3)
+# prepare_terms_for_inference('data/datasets/semeval/no_labels_terms')

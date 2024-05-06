@@ -35,7 +35,7 @@ instance_to_gold_ans = {}
 instance_to_sys_ans = {}
 
 
-with open('../../../data/datasets/semeval/keys/gold/training/training.key.tsv') as gold_file:
+with open('data/datasets/semeval/keys/gold/training/training.key.tsv') as gold_file:
     for line in gold_file:
         cols = line.strip().split('\t')
         inst = cols[0]
@@ -46,7 +46,7 @@ with open('../../../data/datasets/semeval/keys/gold/training/training.key.tsv') 
         op = cols[2]
         instance_to_gold_ans[inst] = (sense, op)
 
-result_path = '../../../data/results/TEMP/semeval/predictedq.tsv'
+result_path = 'data/results/semeval/taxo_expan/predicted2.tsv'
 # result_path = 'keys/baseline/training/training.first-word-first-sense.key.tsv'
 with open(result_path) as sys_file:
     for line in sys_file:
