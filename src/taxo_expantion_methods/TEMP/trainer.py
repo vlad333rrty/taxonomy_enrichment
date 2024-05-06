@@ -23,7 +23,7 @@ class TrainProgressMonitor:
         self.__plot_monitor.accept(Metric('Train loss', loss.item()))
         self.__running_loss += loss.item()
         self.__running_items += 1
-        if i % self.__interval == 0:
+        if i % self.__interval == 0 or i == samples:
             model.eval()
 
             print(f'Epoch [{epoch + 1}/{self.__epochs}]. '
