@@ -22,10 +22,6 @@ class TrainProgressMonitor:
     def __calc_validation_loss(self, model, epoch, i, samples, loss_fn):
         model.eval()
 
-        print(f'Epoch [{epoch + 1}/{self.__epochs}]. '
-              f'Batch [{i}/{samples}].'
-              f'Loss: {self.__running_loss / self.__running_items:.3f}. ')
-
         self.__running_loss, self.__running_items = 0.0, 0.0
 
         test_running_right, test_running_total = 0.0, 0.0
@@ -49,6 +45,9 @@ class TrainProgressMonitor:
         self.__running_loss += loss.item()
         self.__running_items += 1
         if i % self.__interval == 0 or i == samples:
+            print(f'Epoch [{epoch + 1}/{self.__epochs}]. '
+                  f'Batch [{i}/{samples}].'
+                  f'Loss: {self.__running_loss / self.__running_items:.3f}. ')
             if calc_val_loss: self.__calc_validation_loss(model, epoch, i, samples, loss_fn)
             self.__plot_monitor.plot()
 
