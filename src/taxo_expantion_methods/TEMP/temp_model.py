@@ -8,9 +8,12 @@ class TEMP(nn.Module):
         self.model = nn.Sequential(
             nn.Linear(in_dim, hidden_dim),
             nn.Dropout(0.2),
-            nn.LeakyReLU(0.2),
             nn.BatchNorm1d(hidden_dim),
-            nn.Linear(hidden_dim, 1),
+            nn.LeakyReLU(0.2),
+            nn.Linear(hidden_dim, 128), # experiment
+            nn.Dropout(0.2),
+            nn.BatchNorm1d(hidden_dim),
+            nn.Linear(128, 1),
             nn.Sigmoid()
         )
 
