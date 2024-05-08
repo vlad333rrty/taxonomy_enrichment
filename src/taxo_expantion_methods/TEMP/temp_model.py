@@ -12,7 +12,7 @@ class TEMP(nn.Module):
             nn.LeakyReLU(0.2),
             nn.Linear(hidden_dim, 128), # experiment
             nn.Dropout(0.2),
-            nn.BatchNorm1d(hidden_dim),
+            nn.BatchNorm1d(128),
             nn.Linear(128, 1),
             nn.Sigmoid()
         )
