@@ -17,7 +17,7 @@ class TEMP(nn.Module):
             nn.LeakyReLU(0.2),
             nn.Dropout(0.2),
 
-            nn.Linear(hidden_dim, 1)
+            nn.Linear(add_dim, 1)
         )
 
     def forward(self, x):
