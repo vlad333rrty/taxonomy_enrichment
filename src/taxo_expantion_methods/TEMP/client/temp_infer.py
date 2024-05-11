@@ -56,7 +56,7 @@ class TEMPTermInferencePerformer:
             elif len(item) < self.__k:
                 item.append((score, candidate_path))
             else:
-                min = 2
+                min = 1 << 32
                 r = -1
                 for j in range(len(item)):
                     if item[j][0] < score and min > item[j][0]:
