@@ -17,7 +17,7 @@ from src.taxo_expantion_methods.common.ru_wn_dao import RuWordnetDao
 def run_temp_model_training(device, epochs, res_path, model, wn_reader, batch_size=32):
     model = model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=2e-5, betas=(0.9, 0.999))
-    loss_fn = TEMPLoss(0.2).to(device)
+    loss_fn = TEMPLoss(0.3).to(device)
     all_synsets = SynsetsProvider.get_all_synsets_with_common_root(wn_reader.synset('entity.n.01'))
 
     train_synsets, validation_synsets = train_test_split(all_synsets, train_size=0.75, test_size=0.05)
