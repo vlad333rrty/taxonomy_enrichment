@@ -48,8 +48,8 @@ class TEMPTermInferencePerformerTest(unittest.TestCase):
             self._SynsetBatch([synset3, synset4], [[synset1, synset3], [synset1, synset4]])
         ]
         ep = self._EmbeddingProvider({
-            (1, 1): 0.9,
-            (1, 2): 0.5,
+            (1, 1): 1.9,
+            (1, 2): 1.5,
             (1, 3): 0.75,
             (1, 4): 0.5
         })
@@ -60,9 +60,9 @@ class TEMPTermInferencePerformerTest(unittest.TestCase):
         term2_res = result[1]
 
         expected_path = [synset1, synset1]
-        self.assertEquals(0.9, term1_res[0])
-        self.assertEquals(expected_path, term1_res[1])
+        self.assertEquals(1.9, term1_res[0][0])
+        self.assertEquals(expected_path, term1_res[0][1])
 
-        self.assertEquals(0.9, term2_res[0])
-        self.assertEquals(expected_path, term2_res[1])
+        self.assertEquals(1.9, term2_res[0][0])
+        self.assertEquals(expected_path, term2_res[0][1])
 

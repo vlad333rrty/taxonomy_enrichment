@@ -56,14 +56,19 @@ class TEMPTermInferencePerformer:
             elif len(item) < self.__k:
                 item.append((score, candidate_path))
             else:
-                min = 1 << 32
-                r = -1
-                for j in range(len(item)):
-                    if item[j][0] < score and min > item[j][0]:
-                        r = j
-                        min = item[j][0]
+                r = self.__find_min_element_less_then_score(item, score)
                 if r > -1:
                     item[r] = (score, candidate_path)
+
+    def __find_min_element_less_then_score(self, scores_and_paths, score) -> int:
+        selected_index_score = 1 << 32
+        r = -1
+        for j in range(len(scores_and_paths)):
+            current_score = scores_and_paths[j][0]
+            if current_score < score and selected_index_score > current_score:
+                r = j
+                selected_index_score = current_score
+        return r
 
     def __get_candidates_paths(self, taxonomy_paths, terms):
         candidate_paths = []
