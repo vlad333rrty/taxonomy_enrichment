@@ -27,6 +27,6 @@ class TEMPLossExtended(TEMPLoss):
     def forward(self, positive_paths, negative_paths, positive_outputs, negative_outputs):
         r = super().forward(positive_paths, negative_paths, positive_outputs, negative_outputs)
         accum = 0
-        for i in range(positive_paths):
+        for i in range(len(positive_paths)):
             accum += abs(positive_paths[i].min_depth() - negative_paths[i].min_depth())
         return r + accum * self.__h
