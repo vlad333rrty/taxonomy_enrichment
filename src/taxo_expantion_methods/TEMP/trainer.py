@@ -92,11 +92,9 @@ class TEMPTrainer:
         save_path = os.path.join(self.__checkpoint_save_path, 'temp_model_epoch_{}'.format(epoch))
         torch.save(model.state_dict(), save_path)
 
-    def train(self, model, optimizer, temp_loss, train_ds_provider, valid_loader, epochs):
+    def train(self, model, depth_model, optimizer, temp_loss, depth_loss, train_ds_provider, valid_loader, epochs):
         plot_monitor = PlotMonitor()
         monitor = TrainProgressMonitor(50, valid_loader, epochs, plot_monitor, self.__embedding_provider)
-        depth_loss = TEMPDepthCalssifierLoss()
-        depth_model = TEMPDepthClassifier()
         for epoch in range(epochs):
             train_loader = train_ds_provider()
             self.__train_epoch(model, depth_model, temp_loss, depth_loss, optimizer, train_loader, epoch, monitor)

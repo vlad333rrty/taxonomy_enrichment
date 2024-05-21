@@ -8,7 +8,8 @@ from src.taxo_expantion_methods.TEMP.path_selector import RuWnPathSelector, WnPa
 from src.taxo_expantion_methods.TEMP.synsets_provider import SynsetsProvider
 from src.taxo_expantion_methods.TEMP.temp_dataset_generator import TEMPDsCreator
 from src.taxo_expantion_methods.TEMP.temp_embeddings_provider import TEMPEmbeddingProvider
-from src.taxo_expantion_methods.TEMP.temp_loss import TEMPLoss
+from src.taxo_expantion_methods.TEMP.temp_loss import TEMPLoss, TEMPDepthCalssifierLoss
+from src.taxo_expantion_methods.TEMP.temp_model import TEMPDepthClassifier
 from src.taxo_expantion_methods.TEMP.trainer import TEMPTrainer
 from src.taxo_expantion_methods.common.SynsetWrapper import RuSynsetWrapper
 from src.taxo_expantion_methods.common.ru_wn_dao import RuWordnetDao
@@ -18,6 +19,10 @@ def run_temp_model_training(device, epochs, res_path, model, wn_reader, batch_si
     model = model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=2e-5, betas=(0.9, 0.999))
     loss_fn = TEMPLoss(0.2).to(device)
+
+    depth_model = TEMPDepthClassifier().to(device)
+    depth_loss = TEMPDepthCalssifierLoss().to(device)
+
     all_synsets = SynsetsProvider.get_all_synsets_with_common_root(wn_reader.synset('entity.n.01'))
 
     train_synsets, validation_synsets = train_test_split(all_synsets, train_size=0.75, test_size=0.05)
@@ -29,8 +34,10 @@ def run_temp_model_training(device, epochs, res_path, model, wn_reader, batch_si
     trainer = TEMPTrainer(embedding_provider, res_path)
     trainer.train(
         model,
+        depth_model,
         optimizer,
         loss_fn,
+        depth_loss,
         lambda: ds_creator.prepare_ds(train_synsets, batch_size),
         ds_creator.prepare_ds(validation_synsets, batch_size),
         epochs
