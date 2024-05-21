@@ -21,7 +21,7 @@ def run_temp_model_training(device, epochs, res_path, model, wn_reader, batch_si
     loss_fn = TEMPLoss(0.2).to(device)
 
     depth_model = TEMPDepthClassifier().to(device)
-    depth_loss = TEMPDepthCalssifierLoss().to(device)
+    depth_loss = TEMPDepthCalssifierLoss(device).to(device)
 
     all_synsets = SynsetsProvider.get_all_synsets_with_common_root(wn_reader.synset('entity.n.01'))
 
