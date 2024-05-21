@@ -5,6 +5,7 @@ import torch
 from tqdm import tqdm
 
 from src.taxo_expantion_methods.TEMP.temp_loss import TEMPDepthCalssifierLoss
+from src.taxo_expantion_methods.TEMP.temp_model import TEMPDepthClassifier
 from src.taxo_expantion_methods.common.plot_monitor import PlotMonitor, Metric
 from src.taxo_expantion_methods.TEMP.temp_embeddings_provider import TEMPEmbeddingProvider
 
@@ -66,7 +67,7 @@ class TEMPTrainer:
         self.__embedding_provider = embedding_provider
         self.__checkpoint_save_path = checkpoint_save_path
 
-    def __train_epoch(self, model, loss_fn, depth_loss, optimizer, train_loader, epoch,
+    def __train_epoch(self, model, depth_model, loss_fn, depth_loss_fn, optimizer, train_loader, epoch,
                       train_progess_monitor: TrainProgressMonitor):
         for i, batch in (pbar := tqdm(enumerate(train_loader))):
             batch_num = i + 1
@@ -79,7 +80,8 @@ class TEMPTrainer:
 
             output = model(embeddings)
             temp_loss = loss_fn(positive_paths, negative_paths, output[:positive_paths_count], output[positive_paths_count:])
-            depth_loss = depth_loss(positive_paths, negative_paths, output[:positive_paths_count], output[positive_paths_count:])
+            depth_output = depth_model(embeddings)
+            depth_loss = depth_loss_fn(positive_paths, negative_paths, depth_output)
             loss = temp_loss + depth_loss
             loss.backward()
             optimizer.step()
@@ -94,7 +96,8 @@ class TEMPTrainer:
         plot_monitor = PlotMonitor()
         monitor = TrainProgressMonitor(50, valid_loader, epochs, plot_monitor, self.__embedding_provider)
         depth_loss = TEMPDepthCalssifierLoss()
+        depth_model = TEMPDepthClassifier()
         for epoch in range(epochs):
             train_loader = train_ds_provider()
-            self.__train_epoch(model, temp_loss, depth_loss, optimizer, train_loader, epoch, monitor)
+            self.__train_epoch(model, depth_model, temp_loss, depth_loss, optimizer, train_loader, epoch, monitor)
             self.__save_checkpoint(model, epoch)
