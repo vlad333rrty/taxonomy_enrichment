@@ -4,6 +4,7 @@ import os
 import torch
 from tqdm import tqdm
 
+from src.taxo_expantion_methods.TEMP.temp_loss import TEMPDepthCalssifierLoss
 from src.taxo_expantion_methods.common.plot_monitor import PlotMonitor, Metric
 from src.taxo_expantion_methods.TEMP.temp_embeddings_provider import TEMPEmbeddingProvider
 
@@ -13,6 +14,8 @@ class TrainProgressMonitor:
                  embedding_provider: TEMPEmbeddingProvider):
         self.__interval = interval
         self.__running_loss = 0
+        self.__running_temp_loss = 0
+        self.__running_depth_loss = 0
         self.__running_items = 0
         self.__valid_loader = valid_loader
         self.__epochs = epochs
@@ -40,9 +43,14 @@ class TrainProgressMonitor:
         print(f'Test loss: {test_loss:.3f}')
         model.train()
 
-    def step(self, model, epoch, i, samples, loss, loss_fn, calc_val_loss=False):
+    def step(self, model, epoch, i, samples, loss, loss_fn, temp_loss, depth_loss, calc_val_loss=False):
         self.__plot_monitor.accept(Metric('Train loss', loss.item()))
+        self.__plot_monitor.accept(Metric('Temp loss', temp_loss.item()))
+        self.__plot_monitor.accept(Metric('Depth loss', depth_loss.item()))
+
         self.__running_loss += loss.item()
+        self.__running_temp_loss += temp_loss.item()
+        self.__running_depth_loss += depth_loss.item()
         self.__running_items += 1
         if i % self.__interval == 0 or i == samples:
             print(f'Epoch [{epoch + 1}/{self.__epochs}]. '
@@ -58,7 +66,7 @@ class TEMPTrainer:
         self.__embedding_provider = embedding_provider
         self.__checkpoint_save_path = checkpoint_save_path
 
-    def __train_epoch(self, model, loss_fn, optimizer, train_loader, epoch,
+    def __train_epoch(self, model, loss_fn, depth_loss, optimizer, train_loader, epoch,
                       train_progess_monitor: TrainProgressMonitor):
         for i, batch in (pbar := tqdm(enumerate(train_loader))):
             batch_num = i + 1
@@ -70,11 +78,13 @@ class TEMPTrainer:
             embeddings = self.__embedding_provider.get_path_embeddings(positive_paths + negative_paths)
 
             output = model(embeddings)
-            loss = loss_fn(positive_paths, negative_paths, output[:positive_paths_count], output[positive_paths_count:])
+            temp_loss = loss_fn(positive_paths, negative_paths, output[:positive_paths_count], output[positive_paths_count:])
+            depth_loss = depth_loss(positive_paths, negative_paths, output[:positive_paths_count], output[positive_paths_count:])
+            loss = temp_loss + depth_loss
             loss.backward()
             optimizer.step()
 
-            train_progess_monitor.step(model, epoch, batch_num, len(train_loader), loss, loss_fn)
+            train_progess_monitor.step(model, epoch, batch_num, len(train_loader), loss, loss_fn, temp_loss, depth_loss)
 
     def __save_checkpoint(self, model, epoch):
         save_path = os.path.join(self.__checkpoint_save_path, 'temp_model_epoch_{}'.format(epoch))
@@ -83,7 +93,8 @@ class TEMPTrainer:
     def train(self, model, optimizer, temp_loss, train_ds_provider, valid_loader, epochs):
         plot_monitor = PlotMonitor()
         monitor = TrainProgressMonitor(50, valid_loader, epochs, plot_monitor, self.__embedding_provider)
+        depth_loss = TEMPDepthCalssifierLoss()
         for epoch in range(epochs):
             train_loader = train_ds_provider()
-            self.__train_epoch(model, temp_loss, optimizer, train_loader, epoch, monitor)
+            self.__train_epoch(model, temp_loss, depth_loss, optimizer, train_loader, epoch, monitor)
             self.__save_checkpoint(model, epoch)
