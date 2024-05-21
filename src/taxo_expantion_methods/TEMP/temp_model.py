@@ -38,7 +38,9 @@ class TEMPDepthClassifier(nn.Module):
             nn.LeakyReLU(0.2),
             nn.Dropout(0.2),
 
-            nn.Linear(add_dim, 3)
+            nn.Linear(add_dim, 3),
+
+            nn.Softmax()
         )
 
     def forward(self, x):

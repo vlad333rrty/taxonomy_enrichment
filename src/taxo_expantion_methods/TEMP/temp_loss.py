@@ -23,6 +23,7 @@ class TEMPLoss(nn.Module):
 class TEMPDepthCalssifierLoss(nn.Module):
     def __init__(self):
         super(TEMPDepthCalssifierLoss, self).__init__()
+        self.loss = nn.CrossEntropyLoss()
 
     def forward(self, positive_paths, negative_paths, positive_outputs, negative_outputs):
         targets = []
@@ -35,7 +36,7 @@ class TEMPDepthCalssifierLoss(nn.Module):
             targets += tensor
 
         targets = torch.tensor(targets).view((64, 3))
-        return nn.NLLLoss(
+        return self.loss(
             torch.stack((positive_outputs, negative_outputs)),
             targets
         )
