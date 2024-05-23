@@ -20,7 +20,9 @@ def run_temp_model_training(device, epochs, res_path, model, wn_reader, batch_si
     optimizer = torch.optim.Adam(model.parameters(), lr=2e-5, betas=(0.9, 0.999))
     loss_fn = TEMPLoss(0.2).to(device)
 
+
     depth_model = TEMPDepthClassifier().to(device)
+    depth_optimizer = torch.optim.Adam(depth_model.parameters(), lr=2e-5, betas=(0.9, 0.999))
     depth_loss = TEMPDepthCalssifierLoss(device).to(device)
 
     all_synsets = SynsetsProvider.get_all_synsets_with_common_root(wn_reader.synset('entity.n.01'))
@@ -36,6 +38,7 @@ def run_temp_model_training(device, epochs, res_path, model, wn_reader, batch_si
         model,
         depth_model,
         optimizer,
+        depth_optimizer,
         loss_fn,
         depth_loss,
         lambda: ds_creator.prepare_ds(train_synsets, batch_size),

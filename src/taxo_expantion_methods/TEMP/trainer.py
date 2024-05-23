@@ -67,12 +67,13 @@ class TEMPTrainer:
         self.__embedding_provider = embedding_provider
         self.__checkpoint_save_path = checkpoint_save_path
 
-    def __train_epoch(self, model, depth_model, loss_fn, depth_loss_fn, optimizer, train_loader, epoch,
+    def __train_epoch(self, model, depth_model, loss_fn, depth_loss_fn, optimizer, depth_optimizer, train_loader, epoch,
                       train_progess_monitor: TrainProgressMonitor):
         for i, batch in (pbar := tqdm(enumerate(train_loader))):
             batch_num = i + 1
             pbar.set_description(f'EPOCH: {epoch}, BATCH: {batch_num} / {len(train_loader)}')
             optimizer.zero_grad()
+            depth_optimizer.zero_grad()
             positive_paths = batch.positive_paths
             negative_paths = batch.negative_paths
             positive_paths_count = len(positive_paths)
@@ -83,8 +84,10 @@ class TEMPTrainer:
             depth_output = depth_model(embeddings)
             depth_loss = depth_loss_fn(positive_paths, negative_paths, depth_output)
             loss = temp_loss + depth_loss
-            loss.backward()
+            temp_loss.backward()
+            depth_loss.backward()
             optimizer.step()
+            depth_optimizer.step()
 
             train_progess_monitor.step(model, epoch, batch_num, len(train_loader), loss, loss_fn, temp_loss, depth_loss)
 
@@ -92,10 +95,10 @@ class TEMPTrainer:
         save_path = os.path.join(self.__checkpoint_save_path, 'temp_model_epoch_{}'.format(epoch))
         torch.save(model.state_dict(), save_path)
 
-    def train(self, model, depth_model, optimizer, temp_loss, depth_loss, train_ds_provider, valid_loader, epochs):
+    def train(self, model, depth_model, optimizer, depth_optimizer, temp_loss, depth_loss, train_ds_provider, valid_loader, epochs):
         plot_monitor = PlotMonitor()
         monitor = TrainProgressMonitor(50, valid_loader, epochs, plot_monitor, self.__embedding_provider)
         for epoch in range(epochs):
             train_loader = train_ds_provider()
-            self.__train_epoch(model, depth_model, temp_loss, depth_loss, optimizer, train_loader, epoch, monitor)
+            self.__train_epoch(model, depth_model, temp_loss, depth_loss, optimizer, depth_optimizer, train_loader, epoch, monitor)
             self.__save_checkpoint(model, epoch)
