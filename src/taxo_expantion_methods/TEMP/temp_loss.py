@@ -29,8 +29,9 @@ class TEMPLoss(nn.Module):
             tensor = [1., 0., 0.] if len(n) < len(p) else [0., 0., 1.]
             targets += tensor
 
-        targets = torch.tensor(targets).view(outputs.size()).to(self.__device)
-        return r + self.loss(outputs[:, 1:], targets)
+        outputs_view = outputs[:, 1:]
+        targets = torch.tensor(targets).view(outputs_view.size()).to(self.__device)
+        return r + self.loss(outputs_view, targets)
 
 class TEMPDepthCalssifierLoss(nn.Module):
     def __init__(self, device):
