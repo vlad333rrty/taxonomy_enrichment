@@ -38,7 +38,7 @@ class TEMPTermInferencePerformer:
             for synset in tqdm(self.__synsets_batch_provider):
                 paths = synset.hypernym_paths()
                 candidate_paths = self.__get_candidates_paths(paths, term_sysnet_adapters)
-                current_scores = self.__get_scores_for_path(model, candidate_paths)
+                current_scores = self.__get_scores_for_path(model, candidate_paths)[:, 0]
                 for i in range(len(paths)):
                     self.__update_scores(i * len(term_sysnet_adapters), current_scores, paths[i],
                                          scores_and_paths)

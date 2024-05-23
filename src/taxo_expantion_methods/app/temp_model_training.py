@@ -8,7 +8,7 @@ from src.taxo_expantion_methods.TEMP.path_selector import RuWnPathSelector, WnPa
 from src.taxo_expantion_methods.TEMP.synsets_provider import SynsetsProvider
 from src.taxo_expantion_methods.TEMP.temp_dataset_generator import TEMPDsCreator
 from src.taxo_expantion_methods.TEMP.temp_embeddings_provider import TEMPEmbeddingProvider
-from src.taxo_expantion_methods.TEMP.temp_loss import TEMPLoss, TEMPDepthCalssifierLoss
+from src.taxo_expantion_methods.TEMP.temp_loss import TEMPLoss
 from src.taxo_expantion_methods.TEMP.trainer import TEMPTrainer
 from src.taxo_expantion_methods.common.SynsetWrapper import RuSynsetWrapper
 from src.taxo_expantion_methods.common.ru_wn_dao import RuWordnetDao
