@@ -18,12 +18,12 @@ class NodeEmbeddings:
         self.index = index
 
 class EmbeddingsGraphNode:
-    def __init__(self, synset, embeddings):
-        self.__synset = synset
+    def __init__(self, synset_name, embeddings):
+        self.__synset_name = synset_name
         self.__embeddings = embeddings
 
-    def get_synset(self):
-        return self.__synset
+    def get_synset_name(self):
+        return self.__synset_name
 
     def get_embeddings(self) -> [NodeEmbeddings]:
         return self.__embeddings
@@ -36,7 +36,7 @@ class EmbeddingsGraphProvider:
     def __create_embeddings_node(self, synset2node, node: Synset):
         parent_nodes: [EmbeddingsGraphNode] = list(
             map(
-                synset2node.get,
+                lambda x: synset2node.get(x.name()),
                 node.hypernyms()
             )
         )
@@ -51,7 +51,7 @@ class EmbeddingsGraphProvider:
                         i
                     )
                 )
-        return EmbeddingsGraphNode(node, embeddings_accum)
+        return EmbeddingsGraphNode(node.name(), embeddings_accum)
 
     def from_wordnet(self, root: Synset):
         synset2node = {}
@@ -59,18 +59,20 @@ class EmbeddingsGraphProvider:
         queue.append(root)
         while len(queue) > 0:
             u: Synset = queue.popleft()
+            id_name = u.name()
             if len(u.hypernyms()) == 0:
-                embeddings_node = EmbeddingsGraphNode(u, [NodeEmbeddings(self.__embeddings_provider.get_embedding(u), None, -1)])
+                embeddings_node = EmbeddingsGraphNode(id_name, [NodeEmbeddings(self.__embeddings_provider.get_embedding(u), None, -1)])
             else:
-                if len(list(filter(lambda x: x not in synset2node, u.hypernyms()))) > 0:
+                if len(list(filter(lambda x: x.name() not in synset2node, u.hypernyms()))) > 0:
                     queue.append(u)
                     continue
                 embeddings_node = self.__create_embeddings_node(synset2node, u)
-            synset2node[u] = embeddings_node
+            synset2node[id_name] = embeddings_node
             for child in u.hyponyms():
-                if child not in synset2node:
+                if child.name() not in synset2node:
                     queue.append(child)
-            print(len(synset2node), end='\r')
+            if len(synset2node) % 100 == 0:
+                print(len(synset2node), end='\r')
         return synset2node
 
 
