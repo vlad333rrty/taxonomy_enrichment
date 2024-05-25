@@ -14,7 +14,7 @@ class Term:
         return self.__pos
 
     def __str__(self):
-        return self.value()
+        return self.__value
 
     def __repr__(self):
-        return self.value()
+        return self.__value
