@@ -30,8 +30,9 @@ class EmbeddingsGraphNode:
 
 
 class EmbeddingsGraphProvider:
-    def __init__(self, embeddings_provider: EmbeddingsGraphNodeEmbeddingsProvider):
+    def __init__(self, embeddings_provider: EmbeddingsGraphNodeEmbeddingsProvider, embedding_accumulator):
         self.__embeddings_provider = embeddings_provider
+        self.__embedding_accumulator = embedding_accumulator
 
     def __create_embeddings_node(self, synset2node, node: Synset):
         parent_nodes: [EmbeddingsGraphNode] = list(
@@ -46,7 +47,7 @@ class EmbeddingsGraphProvider:
             for i in range(len(embeddings)):
                 embeddings_accum.append(
                     NodeEmbeddings(
-                        embeddings[i].embedding + self.__embeddings_provider.get_embedding(node),
+                        self.__embedding_accumulator(embeddings[i].embedding, self.__embeddings_provider.get_embedding(node)),
                         parent,
                         i
                     )
@@ -71,8 +72,7 @@ class EmbeddingsGraphProvider:
             for child in u.hyponyms():
                 if child.name() not in synset2node:
                     queue.append(child)
-            if len(synset2node) % 100 == 0:
-                print(len(synset2node), end='\r')
+            print('\r', len(synset2node), end='')
         return synset2node
 
 

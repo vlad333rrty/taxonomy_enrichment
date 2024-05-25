@@ -113,7 +113,6 @@ class TaxoScorer:
         coverage = 0
         wup = 0
         lemma_match = 0
-        a, b = [], []
         for term in etalon_term2parent:
             if term not in predicted_term2parent:
                 print('Missing predicted input for synset', term)
@@ -127,12 +126,6 @@ class TaxoScorer:
             true_answs = p_set.intersection(e_set)
             if len(true_answs) > 0:
                 lemma_match += 1
-            a += predicted
-            b += expected
-        with open('data/predicted_list.txt', 'w') as file:
-            file.write('\n'.join(a))
-        with open('data/expected_list.txt', 'w') as file:
-            file.write('\n'.join(b))
 
         return coverage / len(etalon_term2parent), wup / coverage, lemma_match / len(etalon_term2parent)
 
@@ -140,7 +133,7 @@ class TaxoScorer:
 def run_scorer():
     wn_reader = WordNetDao.get_wn_30()
     scorer = TaxoScorer(wn_reader)
-    results = scorer.score_taxo_results('data/results/TEMP/golden.tsv', 'data/results/TEMP/predicted.tsv')
+    results = scorer.score_taxo_results('data/datasets/semeval/keys/gold/training/golden.tsv', 'data/results/semeval/TEMP/predicted2.tsv')
     print(results)
 
 

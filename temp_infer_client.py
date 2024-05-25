@@ -20,7 +20,7 @@ terms = WordToAddDataParser.from_pandas(terms_path, '$')
 
 res_terms = []
 for term in terms:
-    res_terms.append(Term(term.value, term.definition))
+    res_terms.append(Term(term.value, term.definition()))
 
 model = TEMP().to(device)
 model.load_state_dict(torch.load(load_path, map_location=torch.device(device)))
