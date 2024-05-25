@@ -1,27 +1,17 @@
-from transformers import BertTokenizer, BertModel
+import io
+import pickle
 
-from src.taxo_expantion_methods.TEMP.temp_embeddings_provider import TEMPEmbeddingProvider
-from src.taxo_expantion_methods.common.Term import Term
-from src.taxo_expantion_methods.common.wn_dao import WordNetDao
+import torch
 
-
-def read_terms(path):
-    with open(path, 'r') as _file:
-        wn_reader = WordNetDao.get_wn_30()
-        res = []
-        lines = _file.readlines()
-        for line in lines:
-            raw_term = line.strip()
-            synsets = wn_reader.synsets(raw_term)
-            for synset in synsets:
-                res.append(Term(raw_term, synset.definition()))
-        return res
+class _CPU_Unpickler(pickle.Unpickler):
+    def find_class(self, module, name):
+        if module == 'torch.storage' and name == '_load_from_bytes':
+            return lambda b: torch.load(io.BytesIO(b), map_location='cpu')
+        else: return super().find_class(module, name)
 
 
-def __get_temp_embeddings_provider(device='cpu'):
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-    bert_model = BertModel.from_pretrained('bert-base-uncased').to(device)
-    return TEMPEmbeddingProvider(tokenizer, bert_model, device)
-
-terms = read_terms('data/datasets/diachronic-wordnets/en/no_labels_unprocessed')
-
+class GraphLoader:
+    @staticmethod
+    def load_graph(load_path):
+        with open(load_path, 'rb') as file:
+            return _CPU_Unpickler(file).load()
