@@ -28,4 +28,4 @@ class EmbeddingsGraphBERTNodeEmbeddingsProvider(EmbeddingsGraphNodeEmbeddingsPro
         attention_mask = encoding['attention_mask'].to(self.__device)
         outputs = self.__bert_model(input_ids, attention_mask=attention_mask)
         cls_embedding = outputs.last_hidden_state[:, 0, :]
-        return cls_embedding.numpy()
+        return cls_embedding
