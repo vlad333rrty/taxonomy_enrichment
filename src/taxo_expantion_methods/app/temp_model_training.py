@@ -19,7 +19,7 @@ def run_temp_model_training(device, epochs, res_path, model, wn_reader: WordNetC
     model = model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=2e-5, betas=(0.9, 0.999))
     loss_fn = TEMPLoss(0.2).to(device)
-    all_synsets = wn_reader.all_synsets('n')
+    all_synsets = list(wn_reader.all_synsets('n'))
 
     train_synsets, validation_synsets = train_test_split(all_synsets, train_size=0.9, test_size=0.05)
 
