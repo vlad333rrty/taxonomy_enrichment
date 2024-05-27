@@ -39,14 +39,10 @@ class IsATrainer:
             batch_num = i + 1
             pbar.set_description(f'EPOCH: {epoch}, BATCH: {batch_num} / {len(train_loader)}')
             optimizer.zero_grad()
-            positive_paths = batch.positive_samples
-            negative_paths = batch.negative_samples
-            positive_paths_count = len(positive_paths)
-            positive_embeddings = self.__embedding_provider.get_embeddings(positive_paths)
-            negative_embeddings = self.__embedding_provider.get_embeddings(negative_paths)
+            embeddings = self.__embedding_provider.get_embeddings(batch)
 
-            output = model(positive_embeddings, negative_embeddings)
-            loss = loss_fn(output[:positive_paths_count], output[positive_paths_count:])
+            output = model(embeddings)
+            loss = loss_fn(output)
             loss.backward()
             optimizer.step()
 
