@@ -15,7 +15,7 @@ from src.taxo_expantion_methods.TEMP.temp_loss import TEMPLoss
 from src.taxo_expantion_methods.TEMP.trainer import TEMPTrainer
 from src.taxo_expantion_methods.common.SynsetWrapper import RuSynsetWrapper
 from src.taxo_expantion_methods.common.ru_wn_dao import RuWordnetDao
-from src.taxo_expantion_methods.embedding_tree.graph_embedding_provider import PrecalcEmbeddingsProvider
+from src.taxo_expantion_methods.parent_sum.graph_embedding_provider import PrecalcEmbeddingsProvider
 from src.taxo_expantion_methods.is_a.is_a_dataset_generator import IsADatasetGenerator
 from src.taxo_expantion_methods.is_a.train import IsATrainer
 

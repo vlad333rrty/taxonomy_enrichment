@@ -12,7 +12,7 @@ from src.taxo_expantion_methods.common.wn_dao import WordNetDao
 from src.taxo_expantion_methods.datasets_processing.FasttextVectorizer import FasttextVectorizer, BertVectorizer
 from src.taxo_expantion_methods.datasets_processing.TaxoFormatter import TaxoFormatter, TaxoInferFormatter
 from src.taxo_expantion_methods.datasets_processing.wordnet_parser import WordnetParser
-from src.taxo_expantion_methods.embedding_tree.node_embeddings_provider import EmbeddingsGraphBERTNodeEmbeddingsProvider
+from src.taxo_expantion_methods.parent_sum.node_embeddings_provider import EmbeddingsGraphBERTNodeEmbeddingsProvider
 
 
 def __write_to_file(path, data):
