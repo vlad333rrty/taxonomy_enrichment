@@ -16,13 +16,13 @@ class IsADatasetGenerator:
     def __init__(self, all_synsets):
         self.__all_synsets = all_synsets
 
-    def __get_samples_for_node(self, node: Synset, mix_ratio=0.1, samples_count=4):
+    def __get_samples_for_node(self, node: Synset, mix_ratio=0.1, samples_count=8):
         paths = node.hypernym_paths()
         all_positive_nodes = set(
             [x for path in paths for x in path]
         )
         if len(all_positive_nodes) < samples_count:
-            return None
+            return [], []
         chosen = random.choice(paths)
         negative = []
         for i in range(len(chosen) - 1):
