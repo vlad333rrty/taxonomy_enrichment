@@ -15,6 +15,7 @@ args.add_argument('-e', '--epochs', default=None, type=int, help='number of epoc
 args.add_argument('-l', '--load-path', default=None, type=str, help='path to saved model')
 args.add_argument('-res', '--result-path', required=True, type=str)
 args.add_argument('-bs', '--batch-size', default=32, type=int)
+args.add_argument('-ep', '--embeddings-path', required=True, type=str)
 args = args.parse_args()
 
 model = IsAClassifier()
