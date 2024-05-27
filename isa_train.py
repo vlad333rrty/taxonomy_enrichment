@@ -1,5 +1,6 @@
 import argparse
 import pickle
+import time
 
 import torch
 
@@ -23,6 +24,9 @@ if args.load_path is not None:
     model.load_state_dict(torch.load(args.load_path, map_location=torch.device(args.device)))
 
 wn_reader = WordNetDao.get_wn_30()
+start = time.time()
 with open(args.embeddings_path, 'rb') as file:
     embeddings_graph = pickle.load(file)
+end = time.time()
+print('Loaded embeddings in', end - start, 'sec')
 run_isa_model_training(embeddings_graph, args.device, args.epochs, args.result_path, model, wn_reader, args.batch_size)
