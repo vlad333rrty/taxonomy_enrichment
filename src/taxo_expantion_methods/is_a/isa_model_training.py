@@ -12,7 +12,7 @@ from src.taxo_expantion_methods.is_a.train import IsATrainer
 def run_isa_model_training(embeddings_graph, device, epochs, res_path, model, wn_reader: WordNetCorpusReader, batch_size=32):
     model = model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=2e-5, betas=(0.9, 0.999))
-    loss_fn = IsALoss(batch_size)
+    loss_fn = IsALoss(batch_size, device)
     all_synsets = list(wn_reader.all_synsets('n'))
 
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')

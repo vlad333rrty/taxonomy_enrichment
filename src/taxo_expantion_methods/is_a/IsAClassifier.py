@@ -24,11 +24,11 @@ class IsAClassifier(nn.Module):
         return self.model(embeddings)
 
 class IsALoss(nn.Module):
-    def __init__(self, batch_size):
+    def __init__(self, batch_size, device):
         super(IsALoss, self).__init__()
         self.__loss = nn.BCELoss()
         n = batch_size // 2
-        self.__target = torch.cat([torch.ones(n), torch.zeros(n)])
+        self.__target = torch.cat([torch.ones(n), torch.zeros(n)]).to(device)
 
     def forward(self, input):
         return self.__loss(input.view(-1), self.__target)
