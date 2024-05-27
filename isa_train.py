@@ -4,7 +4,6 @@ import time
 
 import torch
 
-from precalc_embeddings_temp import GraphLoader
 from src.taxo_expantion_methods.TEMP.temp_model import TEMP
 from src.taxo_expantion_methods.app.temp_model_training import run_temp_model_training
 from src.taxo_expantion_methods.common.wn_dao import WordNetDao
@@ -26,7 +25,8 @@ if args.load_path is not None:
 
 wn_reader = WordNetDao.get_wn_30()
 start = time.time()
-embeddings_graph = {}
+with open(args.embeddings_path, 'rb') as file:
+    embeddings_graph = pickle.load(file)
 end = time.time()
 print('Loaded embeddings in', end - start, 'sec')
 run_isa_model_training(embeddings_graph, args.device, args.epochs, args.result_path, model, wn_reader, args.batch_size)
