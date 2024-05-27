@@ -17,7 +17,7 @@ class _TermSynsetAdapter:
         self.__term = term
 
     def name(self):
-        return '{}.n.00'.format(self.__term.value)
+        return '{}.n.00'.format(self.__term.value())
 
     def definition(self):
         return self.__term.definition()

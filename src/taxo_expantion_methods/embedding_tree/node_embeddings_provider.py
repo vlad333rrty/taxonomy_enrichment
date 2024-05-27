@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 from nltk.corpus.reader import Synset
 from transformers import BertTokenizer, BertModel
 
+from src.taxo_expantion_methods.utils.utils import get_synset_simple_name
+
 
 class EmbeddingsGraphNodeEmbeddingsProvider(ABC):
     @abstractmethod
@@ -29,3 +31,10 @@ class EmbeddingsGraphBERTNodeEmbeddingsProvider(EmbeddingsGraphNodeEmbeddingsPro
         outputs = self.__bert_model(input_ids, attention_mask=attention_mask)
         cls_embedding = outputs.last_hidden_state[:, 0, :]
         return cls_embedding
+
+class EmbeddingsGraphFasttextNodeEmbeddingsProvider(EmbeddingsGraphNodeEmbeddingsProvider):
+    def __init__(self, model):
+        self.__model = model
+
+    def get_embedding(self, synset: Synset):
+        return self.__model.wv[get_synset_simple_name(synset)]

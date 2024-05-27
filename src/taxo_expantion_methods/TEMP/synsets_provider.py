@@ -20,7 +20,7 @@ class SynsetsProvider:
         return leafs
 
     @staticmethod
-    def get_all_synsets_with_common_root(root: Synset):
+    def get_all_leaf_synsets_with_common_root(root: Synset):
         return SynsetsProvider.__dfs(root)
 
 
