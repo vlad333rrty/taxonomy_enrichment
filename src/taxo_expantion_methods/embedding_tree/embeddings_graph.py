@@ -3,7 +3,7 @@ from collections import deque
 from nltk.corpus.reader import Synset
 from torch import Tensor
 
-from src.taxo_expantion_methods.parent_sum.node_embeddings_provider import EmbeddingsGraphNodeEmbeddingsProvider
+from src.taxo_expantion_methods.embedding_tree.node_embeddings_provider import EmbeddingsGraphNodeEmbeddingsProvider
 
 
 class NodeEmbeddings:
