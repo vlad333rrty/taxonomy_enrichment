@@ -1,4 +1,5 @@
 import random
+import time
 
 from nltk.corpus.reader import Synset
 
@@ -47,6 +48,7 @@ class IsADatasetGenerator:
         return positive[:samples_count], negative[:samples_count]
 
     def generate(self, train_synsets, batch_size=32):
+        start = time.time()
         pos_batch, neg_batch = [], []
         for synset in train_synsets:
             pos, neg = self.__get_samples_for_node(synset)
@@ -58,4 +60,6 @@ class IsADatasetGenerator:
         batches = []
         for i in range(len(pos_batches)):
             batches.append(IsABatch(pos_batches[i], neg_batches[i]))
+        end = time.time()
+        print('Got {} batches in {}sec'.format(len(batches), end - start))
         return batches
