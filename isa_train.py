@@ -5,7 +5,6 @@ import time
 import torch
 
 from src.taxo_expantion_methods.TEMP.temp_model import TEMP
-from src.taxo_expantion_methods.app.temp_model_training import run_temp_model_training
 from src.taxo_expantion_methods.common.wn_dao import WordNetDao
 from src.taxo_expantion_methods.is_a.IsAClassifier import IsAClassifier
 from src.taxo_expantion_methods.is_a.isa_model_training import run_isa_model_training
