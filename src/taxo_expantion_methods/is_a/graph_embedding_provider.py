@@ -2,6 +2,8 @@ import torch
 from nltk.corpus.reader import Synset
 from transformers import BertModel, BertTokenizer
 
+from src.taxo_expantion_methods.parent_sum.embeddings_graph import EmbeddingsGraphNode, NodeEmbeddings
+
 
 class IsAEmbeddingsProvider:
     def __init__(self, embeddings_graph, bert_model: BertModel, tokenizer: BertTokenizer, device):
@@ -29,6 +31,7 @@ class IsAEmbeddingsProvider:
         embed = self.__embeddings_graph.get(synset.name())
         if embed is None:
             embed = self.fallback(synset)
+            self.__embeddings_graph[synset.name()] = EmbeddingsGraphNode(synset.name(), NodeEmbeddings(embed, None, 0))
         else:
             embed = embed.get_embeddings()[0].embedding
         return embed
