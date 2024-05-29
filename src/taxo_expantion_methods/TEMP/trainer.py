@@ -71,8 +71,9 @@ class TEMPTrainer:
 
             output = model(embeddings)
             loss = loss_fn(positive_paths, negative_paths, output[:positive_paths_count], output[positive_paths_count:])
-            loss.backward()
-            optimizer.step()
+            if torch.is_tensor(loss):
+                loss.backward()
+                optimizer.step()
 
             train_progess_monitor.step(model, epoch, batch_num, len(train_loader), loss, loss_fn)
 
@@ -82,7 +83,7 @@ class TEMPTrainer:
 
     def train(self, model, optimizer, temp_loss, train_ds_provider, valid_loader, epochs):
         plot_monitor = PlotMonitor()
-        monitor = TrainProgressMonitor(50, valid_loader, epochs, plot_monitor, self.__embedding_provider)
+        monitor = TrainProgressMonitor(10, valid_loader, epochs, plot_monitor, self.__embedding_provider)
         for epoch in range(epochs):
             train_loader = train_ds_provider()
             self.__train_epoch(model, temp_loss, optimizer, train_loader, epoch, monitor)
