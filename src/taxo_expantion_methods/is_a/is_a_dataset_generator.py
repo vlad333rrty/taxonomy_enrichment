@@ -63,8 +63,19 @@ class IsADatasetGenerator:
             pos, neg = self.__get_samples_for_node(synset)
             pos_batch += list(map(lambda p: (p, synset), pos))
             neg_batch += list(map(lambda p: (p, synset), neg))
-        p_batches = paginate(pos_batch, batch_size)
-        n_batches = paginate(neg_batch, batch_size)
+        p_batches = list(
+            filter(
+                lambda x: len(x) == batch_size,
+                paginate(pos_batch, batch_size)
+            )
+        )
+        n_batches = list(
+            filter(
+                lambda x: len(x) == batch_size,
+                paginate(neg_batch, batch_size)
+            )
+        )
+
         res = list(zip(p_batches, n_batches))
 
         end = time.time()

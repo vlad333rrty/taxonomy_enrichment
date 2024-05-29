@@ -26,7 +26,7 @@ class IsAClassifier(nn.Module):
 class IsALoss(nn.Module):
     def __init__(self, batch_size, device):
         super(IsALoss, self).__init__()
-        self.__loss = nn.MarginRankingLoss()
+        self.__loss = nn.MarginRankingLoss(margin=1.0)
         self.__target = torch.ones(batch_size).to(device)
 
     def forward(self, positive, negative):
