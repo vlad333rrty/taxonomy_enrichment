@@ -13,7 +13,7 @@ class TEMPLoss(nn.Module):
         return (len(p1.union(p2)) / len(p1.intersection(p2)) - 1) * self.__k
 
     def forward(self, positive_paths, negative_paths, positive_outputs, negative_outputs):
-        r = torch.tensor(0)
+        r = torch.tensor([0.], requires_grad=True)
         for i in range(len(positive_paths)):
             for j in range(len(negative_paths)):
                 r += max(0, negative_outputs[j] - positive_outputs[i] + self.__gamma(positive_paths[i], negative_paths[j]))
