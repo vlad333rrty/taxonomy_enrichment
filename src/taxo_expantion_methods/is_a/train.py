@@ -21,11 +21,10 @@ class TrainProgressMonitor:
         self.__running_loss += loss.item()
         self.__running_items += 1
         if i % self.__interval == 0 or i == samples:
+            self.__plot_monitor.plot()
             print(f'Epoch [{epoch + 1}/{self.__epochs}]. '
                   f'Batch [{i}/{samples}].'
                   f'Loss: {self.__running_loss / self.__running_items:.3f}. ')
-            self.__plot_monitor.plot()
-
 
 
 class IsATrainer:
@@ -39,10 +38,13 @@ class IsATrainer:
             batch_num = i + 1
             pbar.set_description(f'EPOCH: {epoch}, BATCH: {batch_num} / {len(train_loader)}')
             optimizer.zero_grad()
-            embeddings = self.__embedding_provider.get_embeddings(batch)
+            positive_samples = batch[0]
+            negative_samples = batch[1]
+            positive_embeddings = self.__embedding_provider.get_embeddings(positive_samples)
+            negative_embeddings = self.__embedding_provider.get_embeddings(negative_samples)
 
-            output = model(embeddings)
-            loss = loss_fn(output)
+            output = model(torch.cat([positive_embeddings, negative_embeddings]))
+            loss = loss_fn(output[:len(positive_embeddings)], output[len(positive_embeddings):])
             loss.backward()
             optimizer.step()
 

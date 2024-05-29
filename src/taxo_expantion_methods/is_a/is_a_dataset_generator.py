@@ -57,11 +57,16 @@ class IsADatasetGenerator:
 
     def generate(self, train_synsets, batch_size):
         start = time.time()
-        batch = []
+        pos_batch = []
+        neg_batch = []
         for synset in train_synsets:
             pos, neg = self.__get_samples_for_node(synset)
-            batch += list(map(lambda p: (p, synset), pos)) + list(map(lambda p: (p, synset), neg)) # todo ...
-        batches = paginate(batch, batch_size)
+            pos_batch += list(map(lambda p: (p, synset), pos))
+            neg_batch += list(map(lambda p: (p, synset), neg))
+        p_batches = paginate(pos_batch, batch_size)
+        n_batches = paginate(neg_batch, batch_size)
+        res = list(zip(p_batches, n_batches))
+
         end = time.time()
-        print('Got {} batches in {}sec'.format(len(batches), end - start))
-        return batches
+        print('Got {} batches in {}sec'.format(len(res), end - start))
+        return res
