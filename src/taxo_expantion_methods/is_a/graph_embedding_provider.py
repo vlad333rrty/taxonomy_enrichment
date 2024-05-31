@@ -28,19 +28,20 @@ class IsAEmbeddingsProvider:
         return cls_embedding
 
     def __get_inner(self, synset):
-        embed = self.__embeddings_graph.get(synset.name())
+        key = synset.name()
+        embed = self.__embeddings_graph.get(key)
         if embed is None:
             embed = self.fallback(synset)
+            self.__embeddings_graph[key] = EmbeddingsGraphNode(key, [NodeEmbeddings(embed, None, 0)])
         else:
             embed = embed.get_embeddings()[0].embedding
         return embed
 
     def get_embeddings(self, synset_pairs):
         res = []
-        for synset_pair in synset_pairs:
-            embed1 = self.__get_inner(synset_pair[0])
-            embed2 = self.__get_inner(synset_pair[1])
-            res.append(torch.cat([embed1, embed2],dim=1))
+        while torch.no_grad():
+            for synset_pair in synset_pairs:
+                embed1 = self.__get_inner(synset_pair[0])
+                embed2 = self.__get_inner(synset_pair[1])
+                res.append(torch.cat([embed1, embed2], dim=1))
         return torch.cat(res)
-
-
