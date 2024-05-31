@@ -31,7 +31,7 @@ class IsAEmbeddingsProvider:
         embed = self.__embeddings_graph.get(synset.name())
         if embed is None:
             embed = self.fallback(synset)
-            self.__embeddings_graph[synset.name()] = EmbeddingsGraphNode(synset.name(), NodeEmbeddings(embed, None, 0))
+            self.__embeddings_graph[synset.name()] = EmbeddingsGraphNode(synset.name(), [NodeEmbeddings(embed, None, 0)])
         else:
             embed = embed.get_embeddings()[0].embedding
         return embed
