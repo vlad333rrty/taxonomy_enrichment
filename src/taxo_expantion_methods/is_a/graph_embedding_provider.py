@@ -39,7 +39,7 @@ class IsAEmbeddingsProvider:
 
     def get_embeddings(self, synset_pairs):
         res = []
-        while torch.no_grad():
+        with torch.no_grad():
             for synset_pair in synset_pairs:
                 embed1 = self.__get_inner(synset_pair[0])
                 embed2 = self.__get_inner(synset_pair[1])
