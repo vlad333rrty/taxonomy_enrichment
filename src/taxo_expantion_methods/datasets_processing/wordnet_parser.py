@@ -3,6 +3,8 @@ import random
 from nltk.corpus import WordNetCorpusReader
 from nltk.corpus.reader import Synset
 
+from src.taxo_expantion_methods.common.Term import Term
+
 
 class WordnetParser:
     @staticmethod
@@ -17,7 +19,8 @@ class WordnetParser:
         terms = set()
         for synset in synsets:
             hyponyms = synset.hyponyms()
-            terms.add(synset.name())
+            term = Term(synset.name(), synset.definition())
+            terms.add(term)
             for hyponym in hyponyms:
                 relations.add((synset.name(), hyponym.name()))
         return terms, relations

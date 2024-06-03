@@ -5,7 +5,7 @@ from nltk.corpus import WordNetCorpusReader
 from sklearn.model_selection import train_test_split
 from transformers import BertTokenizer, BertModel
 
-from src.taxo_expantion_methods.TEMP.path_selector import RuWnPathSelector, WnPathSelector
+from src.taxo_expantion_methods.TEMP.path_selector import RuWnPathSelector, WnPathSelector, SubgraphPathSelector
 from src.taxo_expantion_methods.TEMP.synsets_provider import SynsetsProvider
 from src.taxo_expantion_methods.TEMP.temp_dataset_generator import TEMPDsCreator
 from src.taxo_expantion_methods.TEMP.temp_embeddings_provider import TEMPEmbeddingProvider
@@ -33,7 +33,33 @@ def run_temp_model_training(device, epochs, res_path, model, wn_reader: WordNetC
         optimizer,
         loss_fn,
         lambda: ds_creator.prepare_ds(train_synsets, batch_size),
-        ds_creator.prepare_ds(validation_synsets, batch_size),
+        epochs
+    )
+
+def run_temp_model_training_food_subgraph(device, epochs, res_path, model, wn_reader: WordNetCorpusReader, batch_size=32, k=0.2):
+    model = model.to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=2e-5, betas=(0.9, 0.999))
+    loss_fn = TEMPLoss(k).to(device)
+    root_synset = wn_reader.synset('food.n.01')
+    all_synsets = SynsetsProvider.get_all_leaf_synsets_with_common_root(root_synset)
+
+    train_synsets, train_synsets = train_test_split(all_synsets, train_size=0.8, test_size=0.2)
+    with open('data/datasets/test_temp.tsv', 'w') as file:
+        res_str = ''
+        for s in train_synsets:
+            res_str += '{}\t{}\n'.format(s.name(), ','.join(list(map(lambda x:x.name(), s.hypernyms()))))
+        file.write(res_str)
+
+    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    bert_model = BertModel.from_pretrained('bert-base-uncased').to(device)
+    ds_creator = TEMPDsCreator(all_synsets, SubgraphPathSelector(root_synset))
+    embedding_provider = TEMPEmbeddingProvider(tokenizer, bert_model, device)
+    trainer = TEMPTrainer(embedding_provider, res_path)
+    trainer.train(
+        model,
+        optimizer,
+        loss_fn,
+        lambda: ds_creator.prepare_ds(train_synsets, batch_size),
         epochs
     )
 

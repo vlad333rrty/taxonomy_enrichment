@@ -1,5 +1,7 @@
 from abc import ABC
 
+import nltk
+import numpy as np
 from tqdm import tqdm
 
 
@@ -16,15 +18,39 @@ class TermVectorizer(ABC): # todo do we really need that???
 class FasttextVectorizer(TermVectorizer):
     def __init__(self, model):
         self.__model = model
+        self.__not_found_count = 0
 
     @staticmethod
     def __get_simple_name(term):
         return term.split('.')[0]
 
+    def __get_embedding_for_token(self, token):
+        embedding = self.__model.wv[token]
+        if embedding is None:
+            print('Failed to found embedding for token', token)
+        return np.array(embedding)
+
+    def __get_average_embedding(self, tokens):
+        embeddings = list(
+            filter(
+                lambda x: x is not None,
+                map(
+                    self.__get_embedding_for_token,
+                    tokens
+                )
+            )
+        )
+        return sum(embeddings) / len(embeddings)
+
     def vectorize_terms(self, terms):
         term_and_embed = []
         for term in terms:
-            term_and_embed.append((term, self.__model.wv[FasttextVectorizer.__get_simple_name(term)]))
+            name_tokens = nltk.word_tokenize(term.value())
+            def_tokens = nltk.word_tokenize(term.definition())
+            name_embedding = self.__get_average_embedding(name_tokens)
+            definition_embedding = self.__get_average_embedding(def_tokens)
+            synset_embedding = name_embedding + definition_embedding
+            term_and_embed.append((term.value(), synset_embedding))
         return VectorizationResult(term_and_embed, 300)
 
 class BertVectorizer(TermVectorizer):

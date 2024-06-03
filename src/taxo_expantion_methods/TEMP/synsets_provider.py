@@ -8,19 +8,23 @@ class SynsetsProvider:
     def __dfs(root: Synset):
         stack = [root]
         used = set()
-        leafs = []
+        result = []
         while len(stack) > 0:
             u = stack.pop()
-            if len(u.hyponyms()) == 0:
-                leafs.append(u)
+            result.append(u)
             for child in u.hyponyms():
                 if child not in used:
                     stack.append(child)
             used.add(u)
-        return leafs
+        return result
 
     @staticmethod
     def get_all_leaf_synsets_with_common_root(root: Synset):
+        synsets = SynsetsProvider.get_all_synsets_with_common_root(root)
+        return list(filter(lambda s: len(s.hyponyms()) == 0, synsets))
+
+    @staticmethod
+    def get_all_synsets_with_common_root(root: Synset):
         return SynsetsProvider.__dfs(root)
 
 

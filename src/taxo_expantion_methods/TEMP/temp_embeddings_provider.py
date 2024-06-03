@@ -20,7 +20,7 @@ class TEMPEmbeddingProvider:
                                      ' '.join(map(lambda x: get_synset_simple_name(x), reversed_path[1:])))
             )
 
-        encoding = self.__tokenizer.batch_encode_plus(
+        encoding = self.__tokenizer(
             tokens,
             padding=True,
             truncation=True,

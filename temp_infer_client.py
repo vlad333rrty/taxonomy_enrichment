@@ -40,7 +40,7 @@ def format_result(_terms, results):
             if len(path) > 2:
                 anchors.append(path[-2].name())
 
-        res_str += '{}\t{}\n'.format(term.value, ','.join(anchors))
+        res_str += '{}\t{}\n'.format(term.value(), ','.join(anchors))
     return res_str
 
 

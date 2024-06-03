@@ -43,8 +43,7 @@ class TEMPDsCreator:
         start = time.time()
         samples = []
         for synset in train_synsets:
-            if len(synset.hyponyms()) == 0:  # only leaf nodes
-                self.__process_node(synset, samples)
+            self.__process_node(synset, samples)
         end = time.time()
         print('Finised creating samples in', end - start, 'seconds')
 

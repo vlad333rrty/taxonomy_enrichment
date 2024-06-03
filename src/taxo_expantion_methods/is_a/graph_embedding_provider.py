@@ -1,5 +1,6 @@
 import torch
 from nltk.corpus.reader import Synset
+from tqdm import tqdm
 from transformers import BertModel, BertTokenizer
 
 from src.taxo_expantion_methods.parent_sum.embeddings_graph import EmbeddingsGraphNode, NodeEmbeddings

@@ -10,7 +10,10 @@ class TaxoFormatter:
             list(
                 map(
                     lambda x: '{}\t{}||{}'.format(x, get_simple_name(x), x),
-                    terms
+                    map(
+                        lambda x: x.value(),
+                        terms
+                    )
                 )
             )
         )

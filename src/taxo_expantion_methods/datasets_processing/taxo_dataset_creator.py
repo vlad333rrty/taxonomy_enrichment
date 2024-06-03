@@ -1,3 +1,4 @@
+import random
 import time
 from pathlib import Path
 
@@ -8,10 +9,13 @@ from transformers import BertTokenizer, BertModel
 
 import src.taxo_expantion_methods.common.performance
 from src.taxo_expantion_methods.common import performance
+from src.taxo_expantion_methods.common.Term import Term
 from src.taxo_expantion_methods.common.wn_dao import WordNetDao
 from src.taxo_expantion_methods.datasets_processing.FasttextVectorizer import FasttextVectorizer, BertVectorizer
 from src.taxo_expantion_methods.datasets_processing.TaxoFormatter import TaxoFormatter, TaxoInferFormatter
 from src.taxo_expantion_methods.datasets_processing.wordnet_parser import WordnetParser
+from src.taxo_expantion_methods.datasets_processing.wordnet_subgraphs_provider import WordNetSubgraphProvider
+from src.taxo_expantion_methods.engines.word_to_add_data import WordToAddDataParser
 from src.taxo_expantion_methods.parent_sum.node_embeddings_provider import EmbeddingsGraphBERTNodeEmbeddingsProvider
 
 
@@ -23,13 +27,10 @@ def __get_simple_name(synset_raw):
     return synset_raw.split('.')[0]
 
 
-def prepare_wordnet_for_training(wn_path: str, train_ratio: float, term_vectorizer, prefix):
+def prepare_wordnet_for_training(synsets, train_ratio: float, term_vectorizer, prefix):
     start = time.time()
-    delta, wn_redaer = src.taxo_expantion_methods.common.performance.measure(lambda: WordNetCorpusReader(wn_path, None))
-    print('Wordnet reader created in', delta, 'seconds')
 
-    wordnet_parser = WordnetParser(wn_redaer)
-    delta, terms_and_relations = src.taxo_expantion_methods.common.performance.measure(lambda: wordnet_parser.traverse_nouns())
+    delta, terms_and_relations = performance.measure(lambda: WordnetParser.travers_synsets(synsets))
     print('Traversed wordnet in', delta, 'seconds')
     terms = list(terms_and_relations[0])
     relations = list(terms_and_relations[1])
@@ -61,29 +62,26 @@ def prepare_wordnet_for_training(wn_path: str, train_ratio: float, term_vectoriz
     print('Finished in', end - start, 'seconds')
 
 
-def prepare_terms_for_inference(ds_path, prefix):
-    with open(ds_path, 'r') as file:
-        words = list(map(lambda x: x.strip(), file.readlines()))
-    delta, model = src.taxo_expantion_methods.common.performance.measure(
-        lambda: load_facebook_model('/home/vlad333rrty/Downloads/cc.en.300.bin.gz'))
-    print('Model loaded in', delta, 'seconds')
-    terms_and_embeddings = list(
+def prepare_terms_for_inference(ds_path, prefix, vectorizer):
+    terms = list(
         map(
-            lambda term: (term, model.wv[term]),
-            words
+            lambda wta: Term(wta.value, wta.definition),
+            WordToAddDataParser.from_pandas(ds_path, '$')
         )
     )
-    infer_terms_formatted = TaxoInferFormatter.terms_infer_format(terms_and_embeddings)
+    vectorization_result = vectorizer.vectorize_terms(terms)
+
+    infer_terms_formatted = TaxoInferFormatter.terms_infer_format(vectorization_result.term_and_embed)
     __write_to_file(prefix + 'wordnet_nouns.infer.terms', infer_terms_formatted)
 
-
-def with_fasttext300_embeddings():
-    delta, model = src.taxo_expantion_methods.common.performance.measure(
-        lambda: load_facebook_model('/home/vlad333rrty/Downloads/cc.en.300.bin.gz'))
+def with_fasttext300_embeddings(embeddings_path):
+    delta, model = performance.measure(
+        lambda: load_facebook_model(embeddings_path))
     print('Fasttext model loaded in', delta, 'seconds')
     vectorizer = FasttextVectorizer(model)
     prefix = 'data/datasets/taxo_expan/fasttext/'
-    prepare_wordnet_for_training('data/wordnets/WordNet-3.0/dict', 0.6, vectorizer, prefix)
+    wn = WordNetDao.get_wn_30()
+    prepare_wordnet_for_training(wn.all_synsets('n'), 0.7, vectorizer, prefix)
 
 def with_bert_base_embeddings():
     device = 'cpu'
@@ -94,5 +92,14 @@ def with_bert_base_embeddings():
     prefix = 'data/datasets/taxo_expan/bert/'
     prepare_wordnet_for_training('data/wordnets/WordNet-3.0/dict', 0.6, bert_vectorizer, prefix)
 
-# prepare_terms_for_inference('data/datasets/semeval/no_labels_terms')
-with_fasttext300_embeddings()
+
+def inference_with_fasttext300(embeddings_path, ds_path):
+    delta, model = performance.measure(
+        lambda: load_facebook_model(embeddings_path))
+    print('Model loaded in', delta, 'seconds')
+    vectorizer = FasttextVectorizer(model)
+    prefix = 'data/datasets/taxo_expan/fasttext/'
+    prepare_terms_for_inference(ds_path, prefix, vectorizer)
+
+inference_with_fasttext300('data/embeddings/fasttext/cc.en.300.bin.gz', 'data/datasets/semeval/training_data.csv')
+# with_fasttext300_embeddings('data/embeddings/fasttext/cc.en.300.bin.gz')
