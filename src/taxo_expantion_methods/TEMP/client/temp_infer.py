@@ -27,9 +27,10 @@ class _TermSynsetAdapter:
 
 
 class TEMPTermInferencePerformer:
-    def __init__(self, synsets_batch_provider, embedding_provider: TEMPEmbeddingProvider, k=5):
+    def __init__(self, synsets_batch_provider, embedding_provider: TEMPEmbeddingProvider, path_selector, k=5):
         self.__synsets_batch_provider = synsets_batch_provider
         self.__embedding_provider = embedding_provider
+        self.__path_selector = path_selector
         self.__k = k
 
     def infer(self, model: TEMP, terms_batch: [Term]):
@@ -37,7 +38,7 @@ class TEMPTermInferencePerformer:
         scores_and_paths = [None for _ in terms_batch]
         with torch.no_grad():
             for synset in tqdm(self.__synsets_batch_provider):
-                paths = synset.hypernym_paths()
+                paths = self.__path_selector.select_path(synset.hypernym_paths())
                 candidate_paths = self.__get_candidates_paths(paths, term_sysnet_adapters)
                 current_scores = self.__get_scores_for_path(model, candidate_paths)
                 for i in range(len(paths)):
@@ -83,12 +84,11 @@ class TEMPTermInferencePerformer:
 
 class TEMPTermInferencePerformerFactory:
     @staticmethod
-    def create(device, batch_size, wn_reader: WordNetCorpusReader):
-        all_synsets = list(wn_reader.all_synsets('n'))
+    def create(device, batch_size, all_synsets, path_selector):
         synsets_batches = create_synsets_batch(all_synsets, batch_size)
         tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
         bert_model = BertModel.from_pretrained('bert-base-uncased').to(device)
-        return TEMPTermInferencePerformer(synsets_batches, TEMPEmbeddingProvider(tokenizer, bert_model, device))
+        return TEMPTermInferencePerformer(synsets_batches, TEMPEmbeddingProvider(tokenizer, bert_model, device), path_selector)
 
     @staticmethod
     def create_ru(device, batch_size, ru_wordnet_session):
