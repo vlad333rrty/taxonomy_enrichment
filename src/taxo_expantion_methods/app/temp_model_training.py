@@ -41,9 +41,10 @@ def run_temp_model_training_food_subgraph(device, epochs, res_path, model, wn_re
     optimizer = torch.optim.Adam(model.parameters(), lr=2e-5, betas=(0.9, 0.999))
     loss_fn = TEMPLoss(k).to(device)
     root_synset = wn_reader.synset('food.n.01')
-    all_synsets = SynsetsProvider.get_all_leaf_synsets_with_common_root(root_synset)
+    leaf_synsets = SynsetsProvider.get_all_leaf_synsets_with_common_root(root_synset)
+    all_synsets = SynsetsProvider.get_all_synsets_with_common_root(root_synset)
 
-    train_synsets, train_synsets = train_test_split(all_synsets, train_size=0.8, test_size=0.2)
+    train_synsets, train_synsets = train_test_split(leaf_synsets, train_size=0.8, test_size=0.2)
     with open('data/datasets/test_temp.tsv', 'w') as file:
         res_str = ''
         for s in train_synsets:
