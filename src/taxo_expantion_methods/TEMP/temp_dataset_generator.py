@@ -26,7 +26,9 @@ class TEMPDsCreator:
                 break
             i += 1
         if i > 0: print('Chose node in', i, 'iterations')
-        return self.__path_selector.select_path(random_node)[:-1] + [node]
+        selected_path = self.__path_selector.select_path(random_node)
+        subpath = selected_path if len(selected_path) == 1 else selected_path[:-1]
+        return subpath + [node]
 
     def __collect_sample_paths(self, node: Synset):
         path = self.__path_selector.select_path(node)
