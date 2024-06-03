@@ -38,7 +38,7 @@ class TEMPTermInferencePerformer:
         scores_and_paths = [None for _ in terms_batch]
         with torch.no_grad():
             for synset in tqdm(self.__synsets_batch_provider):
-                paths = self.__path_selector.select_path(synset.hypernym_paths())
+                paths = self.__path_selector.select_path(synset)
                 candidate_paths = self.__get_candidates_paths(paths, term_sysnet_adapters)
                 current_scores = self.__get_scores_for_path(model, candidate_paths)
                 for i in range(len(paths)):
