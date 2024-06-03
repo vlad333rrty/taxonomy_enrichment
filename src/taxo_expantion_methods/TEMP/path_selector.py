@@ -12,7 +12,7 @@ class SubgraphPathSelector:
 
     def select_path(self, node):
         paths = node.hypernym_paths()
-        selected_path = random.choice(paths)
+        selected_path = random.choice(list(filter(lambda x: self.__root in x, paths)))
         i = 0
         while selected_path[i] != self.__root:
             i += 1
