@@ -43,6 +43,7 @@ def run_temp_model_training_food_subgraph(device, epochs, res_path, model, wn_re
     root_synset = wn_reader.synset('food.n.01')
     leaf_synsets = SynsetsProvider.get_all_leaf_synsets_with_common_root(root_synset)
     all_synsets = SynsetsProvider.get_all_synsets_with_common_root(root_synset)
+    print('Got {} synsets and {} leaf synsets'.format(len(all_synsets), len(leaf_synsets)))
 
     train_synsets, train_synsets = train_test_split(leaf_synsets, train_size=0.8, test_size=0.2)
     with open('data/datasets/test_temp.tsv', 'w') as file:
