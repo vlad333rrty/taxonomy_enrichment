@@ -20,4 +20,12 @@ if args.load_path is not None:
     model.load_state_dict(torch.load(args.load_path, map_location=torch.device(args.device)))
 
 wn_reader = WordNetDao.get_wn_30()
-run_temp_model_training_food_subgraph(args.device, args.epochs, args.result_path, model, wn_reader, args.batch_size, args.k)
+root = wn_reader.synset('food.n.01')
+train_synsets = []
+with open('data/datasets/temp_train.tsv', 'r') as file:
+    lines = file.readlines()
+    for line in lines:
+        train_synsets.append(wn_reader.synset(line.strip()))
+
+print('Got {} train synsets'.format(len(train_synsets)))
+run_temp_model_training_food_subgraph(args.device, args.epochs, args.result_path, model, root, train_synsets, args.batch_size, args.k)

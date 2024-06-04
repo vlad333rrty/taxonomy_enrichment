@@ -17,7 +17,7 @@ class _TermSynsetAdapter:
         self.__term = term
 
     def name(self):
-        return '{}.n.00'.format(self.__term.value())
+        return self.__term.value()
 
     def definition(self):
         return self.__term.definition()
@@ -27,10 +27,10 @@ class _TermSynsetAdapter:
 
 
 class TEMPTermInferencePerformer:
-    def __init__(self, synsets_batch_provider, embedding_provider: TEMPEmbeddingProvider, path_selector, k=5):
+    def __init__(self, synsets_batch_provider, embedding_provider: TEMPEmbeddingProvider, path_filter, k=5):
         self.__synsets_batch_provider = synsets_batch_provider
         self.__embedding_provider = embedding_provider
-        self.__path_selector = path_selector
+        self.__path_filter = path_filter
         self.__k = k
 
     def infer(self, model: TEMP, terms_batch: [Term]):
@@ -38,7 +38,7 @@ class TEMPTermInferencePerformer:
         scores_and_paths = [None for _ in terms_batch]
         with torch.no_grad():
             for synset in tqdm(self.__synsets_batch_provider):
-                paths = self.__path_selector.select_path(synset)
+                paths = self.__path_filter.select_path(synset)
                 candidate_paths = self.__get_candidates_paths(paths, term_sysnet_adapters)
                 current_scores = self.__get_scores_for_path(model, candidate_paths)
                 for i in range(len(paths)):
