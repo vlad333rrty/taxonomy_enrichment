@@ -24,6 +24,7 @@ def run(device, epochs, train_ration, ds_path, load_path=None, res_path=None):
         model.load_state_dict(torch.load(load_path, map_location=torch.device(device)))
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-5)
     loss = MLMLoss(config).to(device)
+    BertForMaskedLM.from_pretrained('bert-base-uncased')
 
     trainer = TaxoPromptTrainer(
         tokenizer,

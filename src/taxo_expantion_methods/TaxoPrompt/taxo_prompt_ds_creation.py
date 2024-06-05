@@ -14,7 +14,7 @@ def __get_train_samples(synset_to_node):
         map(
             lambda k: synset_to_node[k],
             filter(
-                lambda key: key.name() != 'entity.n.01',
+                lambda key: key.name() != 'food.n.01',
                 synset_to_node
             )
         )
@@ -22,8 +22,8 @@ def __get_train_samples(synset_to_node):
 
 
 def create_ds():
-    wn = WordNetDao.get_wn_20()
-    synset_to_node = create_extended_taxo_graph(wn.synset('entity.n.01'))
+    wn = WordNetDao.get_wn_30()
+    synset_to_node = create_extended_taxo_graph(wn.synset('food.n.01'))
     train_nodes = __get_train_samples(synset_to_node)
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
     ds_creator = TaxoPromptDsCreator(tokenizer)
@@ -31,7 +31,7 @@ def create_ds():
 
 
 def dump(obj):
-    with open('data/datasets/taxo-prompt/nouns/ds', 'wb') as file:
+    with open('data/datasets/taxo-prompt/nouns/ds_food', 'wb') as file:
         pickle.dump(obj, file)
 
 

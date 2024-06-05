@@ -40,24 +40,32 @@ class TaxoPromptTrainer:
 
             prompts = batch.prompts
             pdefs = batch.pdefs
-            inputs = self.__tokenizer.batch_encode_plus(
-                prompts + pdefs,
+            inputs_prompts = self.__tokenizer(
+                prompts,
                 padding=True,
                 return_tensors='pt',
-                truncation=True
+                truncation=True,
+                add_special_tokens=False
             )
-            tokens = inputs['input_ids'].to(device)
-            attention = inputs['attention_mask'].to(device)
-            prompts_count = len(prompts)
+            inputs_pdefs = self.__tokenizer(
+                pdefs,
+                padding=True,
+                return_tensors='pt',
+                truncation=True,
+                add_special_tokens=False
+            )
+            tokens = inputs_prompts['input_ids'].to(device)
+            attention = inputs_prompts['attention_mask'].to(device)
 
             with torch.no_grad():
                 outputs = self.__bert(
-                    tokens[:prompts_count],
+                    tokens,
                     output_hidden_states=True,
-                    attention_mask=attention[:prompts_count]
+                    attention_mask=attention
                 )
             x = self.__model(outputs[0])
-            loss = self.__loss(x, tokens[prompts_count:])
+            expected_tokens = inputs_pdefs['input_ids'].to(device)
+            loss = self.__loss(x, expected_tokens)
             loss.backward()
             self.__optimizer.step()
 
