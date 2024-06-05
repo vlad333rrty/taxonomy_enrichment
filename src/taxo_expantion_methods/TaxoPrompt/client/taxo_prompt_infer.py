@@ -16,7 +16,7 @@ class Inferer:
     def __taxo_prompt_to_str(self, terms, parent_tokens):
         xs = []
         for i in range(len(terms)):
-            xs.append('What is parent-of {}? It is {}'.format(terms[i].value(), '[MASK]' * len(parent_tokens)))
+            xs.append('What is parent-of {}? It is {}'.format(terms[i].value().split('.')[0], '[MASK]' * len(parent_tokens)))
 
         base_t = self.__tokenizer(
             xs,
