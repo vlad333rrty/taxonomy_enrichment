@@ -57,15 +57,23 @@ class TaxoPromptTrainer:
             tokens = inputs_prompts['input_ids'].to(device)
             attention = inputs_prompts['attention_mask'].to(device)
 
+            expected_tokens = inputs_pdefs['input_ids'].to(device)
+            expected_attention = inputs_pdefs['attention_mask'].to(device)
+
             with torch.no_grad():
                 outputs = self.__bert(
                     tokens,
                     output_hidden_states=True,
                     attention_mask=attention
                 )
+                outputs_expected = self.__bert(
+                    expected_tokens,
+                    output_hidden_states=True,
+                    attention_mask=expected_attention
+                )
             x = self.__model(outputs[0])
-            expected_tokens = inputs_pdefs['input_ids'].to(device)
-            loss = self.__loss(x, expected_tokens)
+            y = self.__model(outputs_expected[0])
+            loss = self.__loss(x, y)
             loss.backward()
             self.__optimizer.step()
 
