@@ -10,34 +10,31 @@ from src.taxo_expantion_methods.common import performance
 from src.taxo_expantion_methods.common.SynsetWrapper import RuSynsetWrapper
 from src.taxo_expantion_methods.common.Term import Term
 from src.taxo_expantion_methods.common.wn_dao import WordNetDao
-from src.taxo_expantion_methods.utils.utils import paginate
+from src.taxo_expantion_methods.utils.utils import paginate, get_synset_simple_name
 
 device = 'cpu'
-terms_path = 'data/datasets/diachronic-wordnets/en/no_labels_nouns_en.2.0-3.0.tsv'
-load_path = 'data/models/TaxoPrompt/pre-trained/taxo_prompt_model_epoch_12'
-result_path = 'data/results/TaxoPrompt/predicted.tsv'
-limit = 1
+terms_path = 'data/datasets/test_temp.tsv'
+load_path = 'data/models/TaxoPrompt/taxo_prompt_model_epoch_19'
+result_path = 'data/results/TaxoPrompt/predicted_food.tsv'
 
 model = TaxoPrompt(BertConfig()).to(device)
 model.load_state_dict(torch.load(load_path, map_location=torch.device(device)))
 model.eval()
 
-def read_terms(path, _limit):
-    with open(path, 'r') as _file:
-        res = []
-        for i in range(_limit):
-            res.append(_file.readline().strip())
-        return res
-
-
-wn_reader = WordNetDao.get_wn_30()
-
-terms = read_terms(terms_path, limit)
 res_terms = []
-for term in terms:
-    synsets = wn_reader.synsets(term)
-    res_terms += list(map(lambda x: Term(term, x.definition()), synsets))
+wn = WordNetDao.get_wn_30()
+test_synsets = set()
 
+with open(terms_path, 'r') as file:
+    lines = file.readlines()
+    for line in lines:
+        data = line.strip().split('\t')
+        word = data[0]
+        test_synsets.add(word)
+        synset = wn.synset(word)
+        definition = synset.definition()
+        res_terms.append(Term(word, definition))
+wn_reader = WordNetDao.get_wn_30()
 
 def format_result(scores):
     res = ''
@@ -46,25 +43,18 @@ def format_result(scores):
     return res
 
 
-inferer = TaxoPromptTermInferencePerformerFactory.create(device, 16)
-
-file_write_lock = threading.Lock()
-
+inferer = TaxoPromptTermInferencePerformerFactory.create(device)
 
 def run(terms_batch):
-    concepts = list(map(lambda x: x.value, terms_batch))
-    defs = list(map(lambda x: x.definition, terms_batch))
-    delta, results = performance.measure(lambda: inferer.infer(model, concepts, defs, device))
+    delta, results = performance.measure(lambda: inferer.infer(model, terms_batch, device))
     print(delta)
     print(results)
     res_str = format_result(results)
-    file_write_lock.acquire()
     with open(result_path, 'a') as append_file:
         append_file.write(res_str)
-    file_write_lock.release()
     print('Got result for {} terms'.format(len(terms_batch)))
 
 with torch.no_grad():
-    batches = paginate(res_terms, 8)
+    batches = paginate(res_terms, 1)
     for batch in batches:
         run(batch)

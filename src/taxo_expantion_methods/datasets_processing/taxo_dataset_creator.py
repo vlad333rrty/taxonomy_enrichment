@@ -8,6 +8,7 @@ from sklearn.model_selection import train_test_split
 from transformers import BertTokenizer, BertModel
 
 import src.taxo_expantion_methods.common.performance
+from src.taxo_expantion_methods.TEMP.synsets_provider import SynsetsProvider
 from src.taxo_expantion_methods.common import performance
 from src.taxo_expantion_methods.common.Term import Term
 from src.taxo_expantion_methods.common.wn_dao import WordNetDao
@@ -69,6 +70,17 @@ def prepare_terms_for_inference(ds_path, prefix, vectorizer):
             WordToAddDataParser.from_pandas(ds_path, '$')
         )
     )
+
+    terms = []
+    wn = WordNetDao.get_wn_30()
+    with open('data/datasets/temp_test.tsv', 'r') as file:
+        lines = file.readlines()
+        for line in lines:
+            data = line.strip().split('\t')
+            word = data[0]
+            definition = wn.synset(word).definition()
+            terms.append(Term(__get_simple_name(word), definition))
+
     vectorization_result = vectorizer.vectorize_terms(terms)
 
     infer_terms_formatted = TaxoInferFormatter.terms_infer_format(vectorization_result.term_and_embed)
@@ -79,9 +91,10 @@ def with_fasttext300_embeddings(embeddings_path):
         lambda: load_facebook_model(embeddings_path))
     print('Fasttext model loaded in', delta, 'seconds')
     vectorizer = FasttextVectorizer(model)
-    prefix = 'data/datasets/taxo_expan/fasttext/'
+    prefix = 'data/datasets/taxo_expan/fasttext/food'
     wn = WordNetDao.get_wn_30()
-    prepare_wordnet_for_training(wn.all_synsets('n'), 0.7, vectorizer, prefix)
+    all_synsets = SynsetsProvider.get_all_synsets_with_common_root(wn.synset('food.n.01'))
+    prepare_wordnet_for_training(all_synsets, 0.8, vectorizer, prefix)
 
 def with_bert_base_embeddings():
     device = 'cpu'
@@ -98,7 +111,7 @@ def inference_with_fasttext300(embeddings_path, ds_path):
         lambda: load_facebook_model(embeddings_path))
     print('Model loaded in', delta, 'seconds')
     vectorizer = FasttextVectorizer(model)
-    prefix = 'data/datasets/taxo_expan/fasttext/'
+    prefix = 'data/datasets/taxo_expan/fasttext/food'
     prepare_terms_for_inference(ds_path, prefix, vectorizer)
 
 inference_with_fasttext300('data/embeddings/fasttext/cc.en.300.bin.gz', 'data/datasets/semeval/training_data.csv')

@@ -1,4 +1,5 @@
 import random
+import re
 
 from nltk.corpus import WordNetCorpusReader
 from nltk.corpus.reader import Synset
@@ -49,7 +50,7 @@ class TaxoScorer:
             terms_and_parents = list(map(lambda x: x.split(sep), file.readlines()))
         term2parent = {}
         for pair in terms_and_parents:
-            term = pair[0]
+            term = pair[0].split('.')[0]
             parents = pair[1].strip().split(',')
             if term in term2parent:
                 term2parent[term] += parents
@@ -76,7 +77,7 @@ class TaxoScorer:
                     # print('No synset in current wordnet for', p)
                     continue
                 p_s = self.__wn_reader.synset(p)
-                wup_cur = self.__wup(e_s, p_s)
+                wup_cur = max(self.__wup(e_s, p_s), self.__wn_reader.wup_similarity(e_s, p_s))
                 if wup_cur > wup_max:
                     wup_max = wup_cur
         return wup_max
@@ -100,6 +101,15 @@ class TaxoScorer:
         print(d)
         return submitted
 
+    def __get_elems_to_filter(self, etalon_term2parent):
+        elems = set()
+        for term in etalon_term2parent:
+            val = etalon_term2parent[term]
+            if re.match('.+(\.v\.\d{1,2})', val[0]):
+                print('Skipping term', term)
+                elems.add(term)
+        return elems
+
     def score_taxo_results(self, golden_path, predicted_path):
         """
         format: new_term \t parent
@@ -109,13 +119,15 @@ class TaxoScorer:
         """
         etalon_term2parent = TaxoScorer.__parse_input(golden_path)
         predicted_term2parent = TaxoScorer.__parse_input(predicted_path)
-        # predicted_term2parent = self.__enrich_submitted(predicted_term2parent)
+        elems_to_filter = self.__get_elems_to_filter(etalon_term2parent)
         coverage = 0
         wup = 0
         lemma_match = 0
         for term in etalon_term2parent:
             if term not in predicted_term2parent:
                 print('Missing predicted input for synset', term)
+                continue
+            if term in elems_to_filter:
                 continue
             coverage += 1
             expected = etalon_term2parent[term]
@@ -133,7 +145,8 @@ class TaxoScorer:
 def run_scorer():
     wn_reader = WordNetDao.get_wn_30()
     scorer = TaxoScorer(wn_reader)
-    results = scorer.score_taxo_results('data/datasets/semeval/keys/gold/training/golden.tsv', 'data/results/semeval/TEMP/predicted2.tsv')
+    results = scorer.score_taxo_results('data/datasets/temp_test.tsv',
+                                        'data/results/semeval/TEMP/predicted2.tsv')
     print(results)
 
 

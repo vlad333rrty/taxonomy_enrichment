@@ -16,7 +16,7 @@ def run(device, epochs, train_ration, ds_path, load_path=None, res_path=None):
 
     print('Train size:', len(X_train))
     tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
-    bert_model = BertModel.from_pretrained('bert-base-uncased', add_pooling_layer=False).to(device)
+    bert_model = BertModel.from_pretrained('bert-base-uncased').to(device)
 
     config = BertConfig()
     model = TaxoPrompt(config).to(device)

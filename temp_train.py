@@ -8,8 +8,8 @@ from src.taxo_expantion_methods.common.wn_dao import WordNetDao
 
 args = argparse.ArgumentParser(description='Training taxonomy expansion model')
 args.add_argument('-d', '--device', default='cpu', type=str, help='used device')
-args.add_argument('-e', '--epochs', default=None, type=int, help='number of epochs')
-args.add_argument('-l', '--load-path', default=None, type=str, help='path to saved model')
+args.add_argument('-e', '--epochs', default=1, type=int, help='number of epochs')
+args.add_argument('-l', '--load-path', default='data/models/TEMP/pre-trained/temp_model_epoch_9', type=str, help='path to saved model')
 args.add_argument('-res', '--result-path', default='data/models/TEMP/checkpoints', type=str)
 args.add_argument('-bs', '--batch-size', default=32, type=int)
 args.add_argument('-', '--k', default=0.2, type=float)

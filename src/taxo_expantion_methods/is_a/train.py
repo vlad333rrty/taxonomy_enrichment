@@ -21,7 +21,7 @@ class TrainProgressMonitor:
         self.__running_loss += loss.item()
         self.__running_items += 1
         if i % self.__interval == 0 or i == samples:
-            self.__plot_monitor.plot()
+            # self.__plot_monitor.plot()
             print(f'Epoch [{epoch + 1}/{self.__epochs}]. '
                   f'Batch [{i}/{samples}].'
                   f'Loss: {self.__running_loss / self.__running_items:.3f}. ')

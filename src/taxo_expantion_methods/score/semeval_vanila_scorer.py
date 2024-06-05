@@ -46,7 +46,7 @@ with open('data/datasets/semeval/keys/gold/training/training.key.tsv') as gold_f
         op = cols[2]
         instance_to_gold_ans[inst] = (sense, op)
 
-result_path = 'data/results/semeval/taxo_expan/predicted2.tsv'
+result_path = 'data/results/semeval/TEMP/predicted2.tsv'
 # result_path = 'keys/baseline/training/training.first-word-first-sense.key.tsv'
 with open(result_path) as sys_file:
     for line in sys_file:
