@@ -30,12 +30,11 @@ class Inferer:
         res = 0
         i = 0
         j = 0
-        while prompt[j] != self.__tokenizer.mask_token_id:
+        while j < len(prompt):
+            if prompt[j] == self.__tokenizer.mask_token_id:
+                res += output[j][tokens[i]]
+                i += 1
             j += 1
-        while prompt[j] == self.__tokenizer.mask_token_id:
-            res += output[j][tokens[i]]
-            j += 1
-            i += 1
         return res / len(tokens)
 
     def infer(self, model, terms, device):
