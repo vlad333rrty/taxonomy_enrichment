@@ -5,7 +5,7 @@ import argparse
 
 args = argparse.ArgumentParser(description='Training taxonomy expansion model')
 args.add_argument('-d', '--device', default='cpu', type=str, help='used device')
-args.add_argument('-e', '--epochs', default=1, type=int, help='number of epochs')
+args.add_argument('-e', '--epochs', default=None, type=int, help='number of epochs')
 args.add_argument('-l', '--load-path', default=None, type=str, help='path to saved model')
 args.add_argument('-res', '--result-path', default='data/models/TEMP/checkpoints', type=str)
 args = args.parse_args()
