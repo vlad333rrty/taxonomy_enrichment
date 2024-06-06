@@ -7,11 +7,10 @@ from src.taxo_expantion_methods.common.plot_monitor import Metric, PlotMonitor
 
 
 class TrainProgressMonitor:
-    def __init__(self, interval: int, valid_loader, epochs: int, plot_monitor):
+    def __init__(self, interval: int, epochs: int, plot_monitor):
         self.__interval = interval
         self.__running_loss = 0
         self.__running_items = 0
-        self.__valid_loader = valid_loader
         self.__epochs = epochs
         self.__plot_monitor = plot_monitor
 
@@ -21,7 +20,7 @@ class TrainProgressMonitor:
         self.__running_loss += loss.item()
         self.__running_items += 1
         if i % self.__interval == 0 or i == samples:
-            # self.__plot_monitor.plot()
+            self.__plot_monitor.plot()
             print(f'Epoch [{epoch + 1}/{self.__epochs}]. '
                   f'Batch [{i}/{samples}].'
                   f'Loss: {self.__running_loss / self.__running_items:.3f}. ')
@@ -54,9 +53,9 @@ class IsATrainer:
         save_path = os.path.join(self.__checkpoint_save_path, 'isa_model_epoch_{}'.format(epoch))
         torch.save(model.state_dict(), save_path)
 
-    def train(self, model, optimizer, temp_loss, train_ds_provider, valid_loader, epochs):
+    def train(self, model, optimizer, temp_loss, train_ds_provider, epochs):
         plot_monitor = PlotMonitor()
-        monitor = TrainProgressMonitor(50, valid_loader, epochs, plot_monitor)
+        monitor = TrainProgressMonitor(50, epochs, plot_monitor)
         for epoch in range(epochs):
             train_loader = train_ds_provider()
             self.__train_epoch(model, temp_loss, optimizer, train_loader, epoch, monitor)

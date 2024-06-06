@@ -13,11 +13,16 @@ def run_isa_model_training(embeddings_graph, device, epochs, res_path, model, wn
     model = model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=2e-5, betas=(0.9, 0.999))
     loss_fn = IsALoss(batch_size, device)
-    all_synsets = list(wn_reader.all_synsets('n'))
+    all_synsets = list(wn_reader.all_synsets('food.n.01'))
 
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
     bert_model = BertModel.from_pretrained('bert-base-uncased').to(device)
-    train_synsets, validation_synsets = train_test_split(all_synsets, train_size=0.7, test_size=0.01)
+
+    train_synsets = []
+    with open('data/datasets/temp_train.tsv', 'r') as file:
+        lines = file.readlines()
+    for line in lines:
+        train_synsets.append(wn_reader.synset(line.strip()))
 
     ds_creator = IsADatasetGenerator(all_synsets)
     embedding_provider = IsAEmbeddingsProvider(embeddings_graph, bert_model, tokenizer, device)
@@ -27,7 +32,6 @@ def run_isa_model_training(embeddings_graph, device, epochs, res_path, model, wn
         optimizer,
         loss_fn,
         lambda: ds_creator.generate(train_synsets, batch_size),
-        ds_creator.generate(validation_synsets, batch_size),
         epochs
     )
 
