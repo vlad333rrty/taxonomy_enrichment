@@ -1,1 +1,4 @@
 nltk
+torch
+gensim
+transformers

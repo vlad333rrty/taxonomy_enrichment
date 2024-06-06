@@ -3,6 +3,7 @@ from nltk.corpus import WordNetCorpusReader
 from sklearn.model_selection import train_test_split
 from transformers import BertTokenizer, BertModel
 
+from src.taxo_expantion_methods.TEMP.synsets_provider import SynsetsProvider
 from src.taxo_expantion_methods.is_a.IsAClassifier import IsALoss
 from src.taxo_expantion_methods.is_a.graph_embedding_provider import IsAEmbeddingsProvider
 from src.taxo_expantion_methods.is_a.is_a_dataset_generator import IsADatasetGenerator
@@ -13,7 +14,7 @@ def run_isa_model_training(embeddings_graph, device, epochs, res_path, model, wn
     model = model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=2e-5, betas=(0.9, 0.999))
     loss_fn = IsALoss(batch_size, device)
-    all_synsets = list(wn_reader.all_synsets('food.n.01'))
+    all_synsets = SynsetsProvider.get_all_synsets_with_common_root(wn_reader.synset('food.n.01'))
     print('Got {} synsets overall'.format(len(all_synsets)))
 
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
